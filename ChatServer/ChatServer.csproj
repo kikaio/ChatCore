@@ -95,11 +95,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configs\ConfigMgr.cs" />
+    <Compile Include="Configs\ServerConf.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Configs\Jsons\ServerConf.json" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChatCore.csproj">
+      <Project>{6cbb98f6-4e02-47f9-999c-5b477441ca88}</Project>
+      <Name>ChatCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
