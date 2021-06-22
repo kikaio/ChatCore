@@ -69,12 +69,19 @@ namespace ChatServer
                     var newSId = SessionMgr.Inst.GetNextSessionId();
                     Task.Factory.StartNew(async () => {
                         var sid = newSId;
+                        logger.WriteDebug($"new session accepted, id : {sid}");
                         UserSession nSession = new UserSession(newSId, tcp);
                         SessionMgr.Inst.AddSession(nSession);
-                        while (isDown && nSession.Sock.Sock.Connected)
+                        while (isDown ==false && nSession.Sock.Sock.Connected)
                         {
                             var p = await nSession.OnRecvTAP();
-                            packageQ.Push(new Package(nSession, p));
+                            if (p.GetHeader() == 0)
+                            {
+                                logger.WriteDebug($"Session {nSession.SessionId}'s hb update");
+                                nSession.UpdateHeartBeat();
+                            }
+                            else
+                                packageQ.Push(new Package(nSession, p));
                         }
                     });
                 }
