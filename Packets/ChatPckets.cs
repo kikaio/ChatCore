@@ -127,15 +127,34 @@ namespace ChatCore.Packets
             UpdateHeader();
         }
 
+        //c to s
+        public class DH_Req : ChatPacket
+        {
+            public DH_Req()
+                : base(PACKET_TYPE.REQ, ECONTENT.DH_KEY_SWAP)
+            {
+            }
+
+            public DH_Req(ChatPacket _cp)
+            {
+                pType = _cp.pType;
+                cType = _cp.cType;
+                data = _cp.data;
+                header = _cp.header;
+            }
+        }
+
         //s to c
-        public class DHNoti : ChatPacket
+        public class DH_Ans : ChatPacket
         {
             public string dhKey { get; set; }
-            public DHNoti()
-                :base(PACKET_TYPE.NONE, ECONTENT.DH_KEY_SWAP)
+            public string dhIV { get; set; }
+
+            public DH_Ans()
+                :base(PACKET_TYPE.ANS, ECONTENT.DH_KEY_SWAP)
             { 
             }
-            public DHNoti(ChatPacket _cp)
+            public DH_Ans(ChatPacket _cp)
             {
                 pType = _cp.pType;
                 cType = _cp.cType;
@@ -152,6 +171,7 @@ namespace ChatCore.Packets
             {
                 base.SerWrite();
                 Translate.Write(data, dhKey);
+                Translate.Write(data, dhIV);
                 UpdateHeader();
             }
         }
