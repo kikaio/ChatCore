@@ -20,6 +20,9 @@ namespace ChatServer.Configs
         public string RSA_Public { get; set; }
         public string Dh_IV { get; set; }
 
+        public Aes mSecret = Aes.Create();
+        public string Dh_KEY;
+
         public ServerConf(JObject _jobj) : base(_jobj)
         {
             Init();
@@ -60,7 +63,12 @@ namespace ChatServer.Configs
             {
                 isNeedUpdate = true;
                 //to do : Create new dh IV
+                mSecret.GenerateIV();
+                Dh_IV = Convert.ToBase64String(mSecret.IV);
             }
+            // generate key whenever start server
+            mSecret.GenerateKey();
+            Dh_KEY = Convert.ToBase64String(mSecret.Key);
 
             if (isNeedUpdate)
             {
@@ -68,5 +76,6 @@ namespace ChatServer.Configs
                 //todo : WriteFile
             }
         }
+
     }
 }
