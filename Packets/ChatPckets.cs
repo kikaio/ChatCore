@@ -102,6 +102,7 @@ namespace ChatCore.Packets
     public class ChatNoti : ChatPacket
     {
         public string msg { get; set; }
+        public long sId { get; set; }
         public ChatNoti()
             : base(PACKET_TYPE.NOTI, ECONTENT.CHAT)
         {
@@ -117,12 +118,14 @@ namespace ChatCore.Packets
 
         public override void SerRead()
         {
+            sId = Translate.Read<long>(data);
             msg = Translate.Read<string>(data);
         }
 
         public override void SerWrite()
         {
             base.SerWrite();
+            Translate.Write(data, sId);
             Translate.Write(data, msg);
             UpdateHeader();
         }
