@@ -52,7 +52,6 @@ namespace ChatClient
                 }
             }));
 
-
         }
 
         public override void Start()
