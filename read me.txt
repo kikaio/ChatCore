@@ -1,0 +1,5 @@
+해당 프로젝트는 ChatCore lib를 공유하며 
+
+각각의 server와 client가 단순 chatting을 하는 프로젝트입니다.
+
+해당 코드는 개인 공부용으로만 참고해주세요.
