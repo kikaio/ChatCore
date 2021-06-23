@@ -88,14 +88,14 @@ namespace ChatServer
             });
         }
 
-        public void BroadCastPacketAllSessions(ChatPacket _cp)
+        public void BroadCastChatAllSessions(ChatPacket _cp)
         {
             logger.WriteDebug($"BroadCast Packet : [{_cp.pType}-{_cp.cType}]");
             Task.Factory.StartNew(async () => {
                 foreach (var s in SessionMgr.Inst.ToSessonList())
                 {
                     var us = s as UserSession;
-                    if(us?.curState == ESessionState.CHAT)
+                    if (us?.curState == ESessionState.CHAT)
                         await us.OnSendTAP(_cp);
                 }
             });

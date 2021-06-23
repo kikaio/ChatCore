@@ -57,7 +57,7 @@ namespace ChatClient
             }));
 
             wDict["cmd"] = new Worker();
-            wDict["cmd"].PushJob(new JobOnce(DateTime.MinValue, () =>
+            wDict["cmd"].PushJob(new JobOnce(DateTime.MinValue, async () =>
             {
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {
@@ -68,22 +68,17 @@ namespace ChatClient
                     }
                     else
                     {
-                        Task.Factory.StartNew(async () => {
-                            ChatNoti noti = new ChatNoti();
-                            noti.sId = mSession.SessionId;
-                            noti.msg = input;
-                            noti.SerWrite();
-                            await mSession.OnSendTAP(noti);
-                            logger.WriteDebug("sended chat noti");
-                        });
+                        ChatNoti noti = new ChatNoti();
+                        noti.sId = mSession.SessionId;
+                        noti.msg = input;
+                        noti.SerWrite();
+                        await mSession.OnSendTAP(noti);
+                        logger.WriteDebug("sended chat noti");
                     }
                 }
             }));
 
-            shutdownAct = () =>
-            {
-                isDown = true;
-            };
+           
         }
 
         public override void Start()
@@ -99,24 +94,11 @@ namespace ChatClient
                 w.Value.WorkStart();
             }
 
-
-            Task.Factory.StartNew(async () =>
-            {
-                while (mSession.curState == ESessionState.TRY_HELLO)
-                {
-                    HelloReq req = new HelloReq();
-                    req.SerWrite();
-                    await mSession.OnSendTAP(req);
-                    logger.WriteDebug("send hello req");
-                    await Task.Delay(3 * 1000);
-                }
-            });
-
-            Task.Factory.StartNew(async () => {
+            Task.Run(async () => {
                 try
                 {
                     logger.WriteDebug("start packet recv from server");
-                    while (isDown == false)
+                    while (isDown == false && mSession.Sock.Sock.Connected)
                     {
                         var p = await mSession.OnRecvTAP();
                         if (p == default(ChatPacket))
@@ -140,6 +122,17 @@ namespace ChatClient
                 }
             });
 
+            Task.Factory.StartNew(async () =>
+            {
+                while (mSession.curState == ESessionState.TRY_HELLO)
+                {
+                    HelloReq req = new HelloReq();
+                    req.SerWrite();
+                    await mSession.OnSendTAP(req);
+                    logger.WriteDebug("send hello req");
+                    await Task.Delay(3 * 1000);
+                }
+            });
         }
 
         protected override void Analizer_Ans(CoreSession _s, Packet _p)
