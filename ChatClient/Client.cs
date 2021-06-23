@@ -56,18 +56,29 @@ namespace ChatClient
                 }
             }));
 
-            Task.Factory.StartNew(async () =>
+            wDict["cmd"] = new Worker();
+            wDict["cmd"].PushJob(new JobOnce(DateTime.MinValue, () =>
             {
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {
-                    var inputs = Console.ReadLine();
+                    var input = Console.ReadLine();
                     if (mSession.curState != ESessionState.CHATABLE)
-                        logger.WriteDebug($"cmd : {inputs}");
-                    else {
-                        mSession.SendChat(inputs);
+                    {
+                        logger.WriteDebug($"[sesstion state]{mSession.curState}");
+                    }
+                    else
+                    {
+                        Task.Factory.StartNew(async () => {
+                            ChatNoti noti = new ChatNoti();
+                            noti.sId = mSession.SessionId;
+                            noti.msg = input;
+                            noti.SerWrite();
+                            await mSession.OnSendTAP(noti);
+                            logger.WriteDebug("sended chat noti");
+                        });
                     }
                 }
-            });
+            }));
 
             shutdownAct = () =>
             {
@@ -77,32 +88,20 @@ namespace ChatClient
 
         public override void Start()
         {
+            CoreTCP tcp = new CoreTCP();
+            ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
+            tcp.Sock.Connect(ep);
+            mSession = new UserSession(-1, tcp);
+            logger.WriteDebug("Client connect to server,");
+            foreach (var w in wDict)
+            {
+                logger.WriteDebug($"{w.Key} is start");
+                w.Value.WorkStart();
+            }
+
+
             Task.Factory.StartNew(async () =>
             {
-                CoreTCP tcp = new CoreTCP();
-                ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
-                tcp.Sock.Connect(ep);
-                mSession = new UserSession(-1, tcp);
-                logger.WriteDebug("Client connect to server,");
-                foreach (var w in wDict)
-                {
-                    logger.WriteDebug($"{w.Key} is start");
-                    w.Value.WorkStart();
-                }
-
-                Task.Factory.StartNew(async () => {
-                    while (isDown == false && mSession.Sock.Sock.Connected)
-                    {
-                        var p = await mSession.OnRecvTAP();
-                        if (p.GetHeader() == 0)
-                        {
-                            //something wrong
-                        }
-                        else
-                            packageQ.Push(new Package(mSession, p));
-                    }
-                });
-
                 while (mSession.curState == ESessionState.TRY_HELLO)
                 {
                     HelloReq req = new HelloReq();
@@ -112,6 +111,35 @@ namespace ChatClient
                     await Task.Delay(3 * 1000);
                 }
             });
+
+            Task.Factory.StartNew(async () => {
+                try
+                {
+                    logger.WriteDebug("start packet recv from server");
+                    while (isDown == false)
+                    {
+                        var p = await mSession.OnRecvTAP();
+                        if (p == default(ChatPacket))
+                        {
+                            logger.Error("Session is closed?");
+                            break;
+                        }
+                        if (p.GetHeader() == 0)
+                        {
+                            logger.Error("Client recv 0, Something is wrong");
+                        }
+                        else
+                            packageQ.Push(new Package(mSession, p));
+                    }
+                    logger.WriteDebug($"{mSession.SessionId} finished packet recv");
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e.ToString());
+                    throw;
+                }
+            });
+
         }
 
         protected override void Analizer_Ans(CoreSession _s, Packet _p)

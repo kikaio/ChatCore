@@ -1,4 +1,5 @@
-﻿using ChatCore.Packets;
+﻿using ChatCore.Enums;
+using ChatCore.Packets;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using System;
@@ -107,6 +108,7 @@ namespace ChatClient.Sessions
                         byte[] bytesDHIV = Convert.FromBase64String(ans.dhIV);
                         Session.SetDhInfo(bytesDHKey, bytesDHIV);
                         Session.UpdateState(ESessionState.CHATABLE);
+                        logger.WriteDebug("now client will send chat noti to server");
                     }
                     break;
                 default:
@@ -125,7 +127,7 @@ namespace ChatClient.Sessions
         {
             switch (_cp.cType)
             {
-                case ChatCore.Enums.ECONTENT.CHAT:
+                case ECONTENT.CHAT:
                     {
                         ChatNoti noti = new ChatNoti(_cp);
                         noti.SerRead();
