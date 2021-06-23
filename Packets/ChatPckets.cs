@@ -129,54 +129,60 @@ namespace ChatCore.Packets
             Translate.Write(data, msg);
             UpdateHeader();
         }
-
-        //c to s
-        public class DH_Req : ChatPacket
+    }
+    //c to s
+    public class DH_Req : ChatPacket
+    {
+        public DH_Req()
+            : base(PACKET_TYPE.REQ, ECONTENT.DH_KEY_SWAP)
         {
-            public DH_Req()
-                : base(PACKET_TYPE.REQ, ECONTENT.DH_KEY_SWAP)
-            {
-            }
-
-            public DH_Req(ChatPacket _cp)
-            {
-                pType = _cp.pType;
-                cType = _cp.cType;
-                data = _cp.data;
-                header = _cp.header;
-            }
         }
 
-        //s to c
-        public class DH_Ans : ChatPacket
+        public DH_Req(ChatPacket _cp)
         {
-            public string dhKey { get; set; }
-            public string dhIV { get; set; }
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
 
-            public DH_Ans()
-                :base(PACKET_TYPE.ANS, ECONTENT.DH_KEY_SWAP)
-            { 
-            }
-            public DH_Ans(ChatPacket _cp)
-            {
-                pType = _cp.pType;
-                cType = _cp.cType;
-                data = _cp.data;
-                header = _cp.header;
-            }
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            UpdateHeader();
+        }
+    }
 
-            public override void SerRead()
-            {
-                dhKey = Translate.Read<string>(data);
-            }
+    //s to c
+    public class DH_Ans : ChatPacket
+    {
+        public string dhKey { get; set; }
+        public string dhIV { get; set; }
 
-            public override void SerWrite()
-            {
-                base.SerWrite();
-                Translate.Write(data, dhKey);
-                Translate.Write(data, dhIV);
-                UpdateHeader();
-            }
+        public DH_Ans()
+            : base(PACKET_TYPE.ANS, ECONTENT.DH_KEY_SWAP)
+        {
+        }
+        public DH_Ans(ChatPacket _cp)
+        {
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
+
+        public override void SerRead()
+        {
+            dhKey = Translate.Read<string>(data);
+            dhIV = Translate.Read<string>(data);
+        }
+
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            Translate.Write(data, dhKey);
+            Translate.Write(data, dhIV);
+            UpdateHeader();
         }
     }
 }
