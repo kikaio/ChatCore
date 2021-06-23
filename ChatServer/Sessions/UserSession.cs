@@ -1,6 +1,8 @@
 ﻿using ChatCore.Packets;
 using CoreNet.Networking;
 using CoreNet.Sockets;
+using CoreNet.Utils;
+using CoreNet.Utils.Loggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +15,12 @@ namespace ChatServer.Sessions
     {
         private ESessionState curState = ESessionState.WELCOME;
         private Dictionary<ESessionState, SessionState> mDispatchDict = new Dictionary<ESessionState, SessionState>();
+        private CoreLogger logger = new ConsoleLogger();
+        internal Server server;
 
-        public UserSession(long _sid, CoreSock _sock) : base(_sid, _sock)
+        public UserSession(long _sid, CoreSock _sock, Server _server) : base(_sid, _sock)
         {
+            server = _server;
             Init();
         }
 
@@ -30,6 +35,7 @@ namespace ChatServer.Sessions
         {
             if (curState == _state)
                 return;
+            logger.WriteDebug($"state from {curState} to {_state}");
             curState = _state;
         }
 

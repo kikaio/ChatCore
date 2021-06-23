@@ -70,7 +70,7 @@ namespace ChatServer
                     Task.Factory.StartNew(async () => {
                         var sid = newSId;
                         logger.WriteDebug($"new session accepted, id : {sid}");
-                        UserSession nSession = new UserSession(newSId, tcp);
+                        UserSession nSession = new UserSession(newSId, tcp, this);
                         SessionMgr.Inst.AddSession(nSession);
                         while (isDown ==false && nSession.Sock.Sock.Connected)
                         {
@@ -84,6 +84,16 @@ namespace ChatServer
                                 packageQ.Push(new Package(nSession, p));
                         }
                     });
+                }
+            });
+        }
+
+        public void BroadCastPacketAllSessions(ChatPacket _cp)
+        {
+            Task.Factory.StartNew(async () => {
+                foreach (var s in SessionMgr.Inst.ToSessonList())
+                {
+                    await s.OnSendTAP(_cp);
                 }
             });
         }

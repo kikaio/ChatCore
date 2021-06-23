@@ -70,11 +70,13 @@ namespace ChatServer.Sessions
             {
                 case ChatCore.Enums.ECONTENT.HELLO:
                     {
+                        logger.WriteDebug("hello req recved");
                         Task.Factory.StartNew(async () =>
-                        {
+                        { 
                             WelcomeAns ans = new WelcomeAns();
                             ans.sId = Session.SessionId;
                             ans.SerWrite();
+                            Session.SetState(ESessionState.DH_SWAP);
                             await Session.OnSendTAP(ans);
                         });
                     }
@@ -97,14 +99,18 @@ namespace ChatServer.Sessions
             {
                 case ChatCore.Enums.ECONTENT.DH_KEY_SWAP:
                     {
+                        logger.WriteDebug("recv dh key req packet");
                         Task.Factory.StartNew(async () => {
                             DH_Ans ans = new DH_Ans();
                             ans.dhKey = ConfigMgr.ServerConf.Dh_KEY;
                             ans.dhIV = ConfigMgr.ServerConf.Dh_IV;
                             ans.SerWrite();
+
+                            Session.SetState(ESessionState.CHAT);
                             await Session.OnSendTAP(ans);
                             //Encrypt communication start
                             Session.SetDhInfo(Convert.FromBase64String(ans.dhKey), Convert.FromBase64String(ans.dhIV));
+                            
                         });
 
                     }
@@ -119,6 +125,20 @@ namespace ChatServer.Sessions
     {
         public Session_Chat(UserSession _us) : base(_us)
         {
+        }
+
+        public override void Dispatch_Noti(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ChatCore.Enums.ECONTENT.CHAT:
+                    {
+
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
