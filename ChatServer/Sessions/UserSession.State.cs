@@ -110,7 +110,12 @@ namespace ChatServer.Sessions
                             await Session.OnSendTAP(ans);
                             //Encrypt communication start
                             Session.SetDhInfo(Convert.FromBase64String(ans.dhKey), Convert.FromBase64String(ans.dhIV));
-                            
+                            await Task.Delay(2000);
+                            logger.WriteDebug("send chat");
+                            ChatNoti noti = new ChatNoti();
+                            noti.sId = Session.SessionId;
+                            noti.msg = "Hello~~";
+                            await Session.OnSendTAP(noti);
                         });
 
                     }
@@ -133,7 +138,9 @@ namespace ChatServer.Sessions
             {
                 case ChatCore.Enums.ECONTENT.CHAT:
                     {
-
+                        ChatNoti noti = new ChatNoti(_cp);
+                        noti.SerRead();
+                        Server.Inst.BroadCastPacketAllSessions(noti);
                     }
                     break;
                 default:

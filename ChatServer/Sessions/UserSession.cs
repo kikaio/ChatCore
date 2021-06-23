@@ -13,7 +13,7 @@ namespace ChatServer.Sessions
 {
     public class UserSession : CoreSession
     {
-        private ESessionState curState = ESessionState.WELCOME;
+        public ESessionState curState { get; private set; } = ESessionState.WELCOME;
         private Dictionary<ESessionState, SessionState> mDispatchDict = new Dictionary<ESessionState, SessionState>();
         private CoreLogger logger = new ConsoleLogger();
         internal Server server;

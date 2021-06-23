@@ -90,10 +90,13 @@ namespace ChatServer
 
         public void BroadCastPacketAllSessions(ChatPacket _cp)
         {
+            logger.WriteDebug($"BroadCast Packet : [{_cp.pType}-{_cp.cType}]");
             Task.Factory.StartNew(async () => {
                 foreach (var s in SessionMgr.Inst.ToSessonList())
                 {
-                    await s.OnSendTAP(_cp);
+                    var us = s as UserSession;
+                    if(us?.curState == ESessionState.CHAT)
+                        await us.OnSendTAP(_cp);
                 }
             });
         }
