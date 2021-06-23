@@ -16,15 +16,17 @@ namespace ChatClient
             CoreLogger logger = new ConsoleLogger();
             try
             {
-                Client.Inst.ReadyToStart();
-                Client.Inst.Start();
-
-                while (Client.Inst.isDown == false)
+                using (var c = Client.Inst)
                 {
-                    Thread.Sleep(3000);
+                    c.ReadyToStart();
+                    c.Start();
+
+                    while (Client.Inst.isDown == false)
+                    {
+                        Thread.Sleep(3000);
+                    }
+                    Console.WriteLine("Client is down, press any key");
                 }
-                Console.WriteLine("Client is down, press any key");
-                Console.ReadKey();
             }
             catch (Exception e)
             {

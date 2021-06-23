@@ -13,7 +13,7 @@ namespace ChatClient.Sessions
 {
     public partial class UserSession : CoreSession, IDispatch
     {
-        private ESessionState curState;
+        public ESessionState curState { get; protected set; } = ESessionState.TRY_HELLO;
         private Dictionary<ESessionState, SessionState> stateDict = new Dictionary<ESessionState, SessionState>();
         private CoreLogger logger = new ConsoleLogger();
 
@@ -35,6 +35,17 @@ namespace ChatClient.Sessions
                 return;
             logger.WriteDebug($"session state update from {curState.ToString()} to {_s.ToString()}");
             curState = _s;
+        }
+
+        public void SendChat(string _msg)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                ChatNoti noti = new ChatNoti();
+                noti.sId = SessionId;
+                noti.msg = _msg;
+                await OnSendTAP(noti);
+            });
         }
 
         public void Dispatch_Ans(ChatPacket _cp)

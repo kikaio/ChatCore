@@ -15,12 +15,15 @@ using System.Threading.Tasks;
 
 namespace ChatClient
 {
-    public class Client : CoreNetwork
+    public class Client : CoreNetwork, IDisposable
     {
         public static Client Inst { get; } = new Client();
 
         private UserSession mSession = default(UserSession);
         private Dictionary<string, Worker> wDict = new Dictionary<string, Worker>();
+
+        private bool isDisposed = false;
+
 
         public override void ReadyToStart()
         {
@@ -42,6 +45,7 @@ namespace ChatClient
             wDict["pkg"].PushJob(new JobOnce(DateTime.MinValue, () => {
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {
+                    packageQ.Swap();
                     while (true)
                     {
                         var pkg = packageQ.pop();
@@ -52,6 +56,23 @@ namespace ChatClient
                 }
             }));
 
+            Task.Factory.StartNew(async () =>
+            {
+                while (isDown == false && mSession.Sock.Sock.Connected)
+                {
+                    var inputs = Console.ReadLine();
+                    if (mSession.curState != ESessionState.CHATABLE)
+                        logger.WriteDebug($"cmd : {inputs}");
+                    else {
+                        mSession.SendChat(inputs);
+                    }
+                }
+            });
+
+            shutdownAct = () =>
+            {
+                isDown = true;
+            };
         }
 
         public override void Start()
@@ -67,6 +88,28 @@ namespace ChatClient
                 {
                     logger.WriteDebug($"{w.Key} is start");
                     w.Value.WorkStart();
+                }
+
+                Task.Factory.StartNew(async () => {
+                    while (isDown == false && mSession.Sock.Sock.Connected)
+                    {
+                        var p = await mSession.OnRecvTAP();
+                        if (p.GetHeader() == 0)
+                        {
+                            //something wrong
+                        }
+                        else
+                            packageQ.Push(new Package(mSession, p));
+                    }
+                });
+
+                while (mSession.curState == ESessionState.TRY_HELLO)
+                {
+                    HelloReq req = new HelloReq();
+                    req.SerWrite();
+                    await mSession.OnSendTAP(req);
+                    logger.WriteDebug("send hello req");
+                    await Task.Delay(3 * 1000);
                 }
             });
         }
@@ -97,6 +140,18 @@ namespace ChatClient
             var s = _s as UserSession;
             ChatPacket cp = new ChatPacket(_p);
             s?.Dispatch_Test(cp);
+        }
+
+        public void Dispose()
+        {
+            if (isDisposed)
+                return;
+            isDisposed = true;
+            foreach (var w in wDict)
+            {
+                logger.WriteDebug($"{w.Key} is Fin");
+                w.Value.WorkFinish();
+            }
         }
     }
 }

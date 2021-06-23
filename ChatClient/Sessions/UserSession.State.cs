@@ -92,7 +92,7 @@ namespace ChatClient.Sessions
         {
         }
 
-        public override void Dispatch_Req(ChatPacket _cp)
+        public override void Dispatch_Ans(ChatPacket _cp)
         {
             switch (_cp.cType)
             {
@@ -101,8 +101,8 @@ namespace ChatClient.Sessions
                         DH_Ans ans = new DH_Ans(_cp);
                         ans.SerRead();
                         logger.WriteDebug("recv dh req");
-                        logger.WriteDebug($"recv dh iv:{ans.dhIV}");
                         logger.WriteDebug($"recv dh key:{ans.dhKey}");
+                        logger.WriteDebug($"recv dh iv:{ans.dhIV}");
                         byte[] bytesDHKey = Convert.FromBase64String(ans.dhKey);
                         byte[] bytesDHIV = Convert.FromBase64String(ans.dhIV);
                         Session.SetDhInfo(bytesDHKey, bytesDHIV);
