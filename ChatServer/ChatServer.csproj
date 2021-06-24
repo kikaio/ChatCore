@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configs\ConfigMgr.cs" />
+    <Compile Include="Configs\DBConf.cs" />
     <Compile Include="Configs\ServerConf.cs" />
     <Compile Include="DataBases\Common\Account.cs" />
     <Compile Include="Program.cs" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Configs\Jsons\DBConf.json" />
     <None Include="Configs\Jsons\ServerConf.json" />
     <Compile Include="Sessions\UserSession.State.cs" />
   </ItemGroup>

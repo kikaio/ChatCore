@@ -1,0 +1,12 @@
+﻿{
+  "DB_COMMON": {
+    "IP": "127.0.0.1",
+    "PORT": 3307,
+    "DB_NAME": "TestDB",
+  },
+  "DB_NOT_USE": {
+    "IP": "127.0.0.1",
+    "PORT": 3307,
+    "DB_NAME": "TestDB"
+  }
+}
