@@ -78,6 +78,7 @@
       <HintPath>..\libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -98,6 +99,7 @@
   <ItemGroup>
     <Compile Include="Configs\ConfigMgr.cs" />
     <Compile Include="Configs\ServerConf.cs" />
+    <Compile Include="DataBases\Common\Account.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
@@ -114,6 +116,9 @@
       <Name>ChatCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DataBases\Game\" />
+    <Folder Include="DataBases\SQLs\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
