@@ -86,7 +86,10 @@ namespace ChatClient
         public override void Start()
         {
             CoreTCP tcp = new CoreTCP();
-            ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 30000);
+            var serverIP = ConfigMgr.ClientConfig.Server;
+            var port = ConfigMgr.ClientConfig.Port;
+
+            ep = new IPEndPoint(IPAddress.Parse(serverIP), port);
             tcp.Sock.Connect(ep);
             mSession = new UserSession(-1, tcp);
             logger.WriteDebug("Client connect to server,");
