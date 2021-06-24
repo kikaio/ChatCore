@@ -11,9 +11,13 @@ namespace ChatServer.Configs
 {
     public class DBConf : JsonicObj
     {
-        public string Ip { get; set; }
+        public string Server { get; set; }
         public int Port { get; set; }
-        public string Db_Name { get; set; }
+        public string Database { get; set; }
+        public string Uid { get; set; }
+        public string Password { get; set; }
+        public int ConnectionTimeout { get; set; }
+
 
         public bool IsNeedCreateFile = false;
         public DBConf(JObject _jobj) : base(_jobj)
@@ -25,10 +29,10 @@ namespace ChatServer.Configs
         {
             bool IsNeedCreateFile = false;
 
-            if (Ip == "")
+            if (Server == "")
             {
                 IsNeedCreateFile = true;
-                Ip = "127.0.0.1";
+                Server = "127.0.0.1";
             }
 
             if (Port == 0)
@@ -37,11 +41,25 @@ namespace ChatServer.Configs
                 Port = 3307;
             }
 
-            if (Db_Name == "")
+            if (Database == "")
             {
                 IsNeedCreateFile = true;
-                Db_Name = "TestDB";
+                Database = "TestDB";
             }
+        }
+
+        public string GetConnStr()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"");
+            foreach (var pInfo in this.GetType().GetProperties())
+            {
+                if (pInfo.Name == "ConnectionTimeout")
+                    sb.Append($"Connection Timeout={pInfo.GetValue(this)};");
+                else
+                    sb.Append($"{pInfo.Name}={pInfo.GetValue(this)};");
+            }
+            return sb.ToString();
         }
     }
 }

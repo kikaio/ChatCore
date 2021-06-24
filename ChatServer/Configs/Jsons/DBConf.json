@@ -1,12 +1,18 @@
 ﻿{
-  "DB_COMMON": {
-    "IP": "127.0.0.1",
-    "PORT": 3307,
-    "DB_NAME": "TestDB",
+  "COMMON_DB": {
+    "SERVER": "127.0.0.1",
+    "PORT": 3306,
+    "DATABASE": "TestDB",
+    "UID": "sweetmeats_boy",
+    "PASSWORD": "test",
+    "CONNECTIONTIMEOUT" :  10000
   },
   "DB_NOT_USE": {
-    "IP": "127.0.0.1",
-    "PORT": 3307,
-    "DB_NAME": "TestDB"
+    "SERVER": "127.0.0.1",
+    "PORT": 3306,
+    "DATABASE": "TestDB",
+    "UID": "sweetmeats_boy",
+    "PASSWORD": "test",
+    "CONNECTIONTIMEOUT": 10000
   }
 }
