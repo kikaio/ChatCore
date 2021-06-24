@@ -13,6 +13,10 @@ namespace ChatCore.Enums
         HELLO,
         WELCOME,
         DH_KEY_SWAP,
+        SIGN_UP,
+        SIGN_IN,
+        SIGN_OUT,
+        REQ_RESULT,
         TEST,
         CHAT,
     }

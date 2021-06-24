@@ -187,4 +187,130 @@ namespace ChatCore.Packets
             UpdateHeader();
         }
     }
+
+    public class SignUp_Req : ChatPacket
+    {
+        public string NickName { get; set; }
+        public string Pw { get; set; }
+
+        public SignUp_Req()
+            : base(PACKET_TYPE.REQ, ECONTENT.SIGN_UP)
+        {
+        }
+        public SignUp_Req(ChatPacket _cp)
+        {
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
+
+        public override void SerRead()
+        {
+            NickName = Translate.Read<string>(data);
+            Pw = Translate.Read<string>(data);
+        }
+
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            Translate.Write(data, NickName);
+            Translate.Write(data, Pw);
+            UpdateHeader();
+        }
+    }
+    public class SignIn_Req : ChatPacket
+    {
+        public string NickName { get; set; }
+        public string Pw { get; set; }
+
+
+        public SignIn_Req()
+            : base(PACKET_TYPE.REQ, ECONTENT.SIGN_UP)
+        {
+        }
+        public SignIn_Req(ChatPacket _cp)
+        {
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
+
+        public override void SerRead()
+        {
+            NickName = Translate.Read<string>(data);
+            Pw = Translate.Read<string>(data);
+        }
+
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            Translate.Write(data, NickName);
+            Translate.Write(data, Pw);
+            UpdateHeader();
+        }
+    }
+
+    public class SignOut_Req : ChatPacket
+    {
+        public string NickName { get; set; }
+        public string Pw { get; set; }
+
+
+        public SignOut_Req()
+            : base(PACKET_TYPE.REQ, ECONTENT.SIGN_UP)
+        {
+        }
+        public SignOut_Req(ChatPacket _cp)
+        {
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
+
+        public override void SerRead()
+        {
+            NickName = Translate.Read<string>(data);
+            Pw = Translate.Read<string>(data);
+        }
+
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            Translate.Write(data, NickName);
+            Translate.Write(data, Pw);
+            UpdateHeader();
+        }
+    }
+
+
+
+    public class Result_Ans : ChatPacket
+    {
+        public bool IsSuccessed { get; set; }
+        public Result_Ans()
+            : base(PACKET_TYPE.ANS, ECONTENT.REQ_RESULT)
+        {
+        }
+        public Result_Ans(ChatPacket _cp)
+        {
+            pType = _cp.pType;
+            cType = _cp.cType;
+            data = _cp.data;
+            header = _cp.header;
+        }
+
+        public override void SerRead()
+        {
+            IsSuccessed = Translate.Read<bool>(data);
+        }
+        public override void SerWrite()
+        {
+            base.SerWrite();
+            Translate.Write(data, IsSuccessed);
+            UpdateHeader();
+        }
+    }
 }
