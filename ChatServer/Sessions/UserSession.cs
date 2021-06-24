@@ -6,6 +6,7 @@ using CoreNet.Utils.Loggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ namespace ChatServer.Sessions
         private Dictionary<ESessionState, SessionState> mDispatchDict = new Dictionary<ESessionState, SessionState>();
         private CoreLogger logger = new ConsoleLogger();
         internal Server server;
+
+        internal RSAParameters rsaPublicParam;
 
         public UserSession(long _sid, CoreSock _sock, Server _server) : base(_sid, _sock)
         {

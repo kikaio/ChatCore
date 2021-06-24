@@ -1,10 +1,12 @@
 ﻿using ChatCore.Packets;
 using ChatServer.Configs;
+using CoreNet.Cryptor;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static ChatCore.Packets.ChatNoti;
@@ -70,6 +72,13 @@ namespace ChatServer.Sessions
             {
                 case ChatCore.Enums.ECONTENT.HELLO:
                     {
+                        HelloReq req = new HelloReq(_cp);
+                        req.SerRead();
+                        using (var csp = new RSACryptoServiceProvider())
+                        {
+                            csp.FromXmlString(req.publicRsaXml);
+                            Session.rsaPublicParam = csp.ExportParameters(false);
+                        }
                         logger.WriteDebug("hello req recved");
                         Task.Factory.StartNew(async () =>
                         { 
@@ -102,16 +111,29 @@ namespace ChatServer.Sessions
                         logger.WriteDebug("recv dh key req packet");
                         Task.Factory.StartNew(async () => {
                             DH_Ans ans = new DH_Ans();
+                            var dhKey = ConfigMgr.ServerConf.Dh_KEY;
+                            var dhIv = ConfigMgr.ServerConf.Dh_IV;
+
                             ans.dhKey = ConfigMgr.ServerConf.Dh_KEY;
                             ans.dhIV = ConfigMgr.ServerConf.Dh_IV;
+                            logger.WriteDebug($"======Before Encrypt DH=======");
+                            logger.WriteDebug($"DH_KEY:{ans.dhKey}");
+                            logger.WriteDebug($"DH_IV:{ans.dhIV}");
+                            {
+                                ans.dhKey = CryptHelper.RsaEncryptWithBase64(ans.dhKey, Session.rsaPublicParam);
+                                ans.dhIV = CryptHelper.RsaEncryptWithBase64(ans.dhIV, Session.rsaPublicParam);
+                            }
+                            logger.WriteDebug($"=======After Encrypt DH========");
+                            logger.WriteDebug($"DH_KEY:{ans.dhKey}");
+                            logger.WriteDebug($"DH_IV:{ans.dhIV}");
+
+
                             ans.SerWrite();
 
                             Session.SetState(ESessionState.CHAT);
                             await Session.OnSendTAP(ans);
                             //Encrypt communication start
-                            Session.SetDhInfo(Convert.FromBase64String(ans.dhKey), Convert.FromBase64String(ans.dhIV));
-                            logger.WriteDebug($"DH_KEY:{ans.dhKey}");
-                            logger.WriteDebug($"DH_IV:{ans.dhIV}");
+                            Session.SetDhInfo(Convert.FromBase64String(dhKey), Convert.FromBase64String(dhIv));
                         });
                     }
                     break;

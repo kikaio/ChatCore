@@ -3,6 +3,5 @@
   "MAX_THREAD_CNT": "0",
   "CATEGORY": "Chat",
   "RSA_PRIVATE": "<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<RSAParameters xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <Exponent>AQAB</Exponent>\r\n  <Modulus>1WnbqI7X//XSr7e49IM6VsO7XjtHMFqnZtq2t2dNrFO2cO78No+RO0a04BQkjTAQocCFIf10h0OL1NSuJzFq2hKHoz5ttKfPKpmqGEF9jzh4Tyr5s3kBlVtR9mh4JH00PWQknjLHMF2YFg4TuSnHJPppncsVbvQZS5E7wnRniQk=</Modulus>\r\n  <P>9Qpnee8ZCAzfi1akzgnSsPugCSMoAx/5eqotVjUFD+Hw7l0E3cuwWOvbR+ogxEEZpsGhkTrXC2bbH6k/ih9fcw==</P>\r\n  <Q>3vVWrbsFM7nCB5ktZtBHCJcyMuKdUsutO6rYHkPzMAL7+yb0JCujksI2F6a6AF/yXrz7QyVa8ZLA20QKbmrekw==</Q>\r\n  <DP>RDxzeEcWx2EeVyT3m9CsdVB8zk6V89jRllERcvIsyLF4cEhC9KimIPz9AVe3bC9cv00oetLR04D/ACAXa5U09Q==</DP>\r\n  <DQ>2bLmUrY0yx/K085+JVCiu0Gec08QXEKhwIv9f/fLIYsYbU/IvPSbP/ZACPHz1d/ZcSXHlPWJii1IABC8urnA3w==</DQ>\r\n  <InverseQ>mMpK39AxEIcRDkh41ewatdwdetr+yK4LCXJ7GgOF3E44P51LQs07f00n/oHcJez4jJN+Gxg++Eb6SeKb/y9mVA==</InverseQ>\r\n  <D>bWHCWdRM1T3zbGin/Xq9DfdoM1YCmL/+CPOUrs/dubN2UM/MqVJQR6dn0WnBijPWcnEwS0mSzjlKlB0l3aSwdIEoOby/JnvcrA6srnaP2QrfKHd4wtdsyFH76qvEX7JU0pTnfYNVJlGkdh3TqZUCP8xYHrhUEBlBPke1lH833tk=</D>\r\n</RSAParameters>",
-  "RSA_PUBLIC": "",
   "DH_IV": "Cj6mFNB/hde+PaZqM22W3g=="
 }
