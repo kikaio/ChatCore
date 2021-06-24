@@ -31,6 +31,7 @@ namespace ChatServer.Sessions
         {
             mDispatchDict[ESessionState.WELCOME] = new Session_Welcome(this);
             mDispatchDict[ESessionState.DH_SWAP] = new Session_DhSwap(this);
+            mDispatchDict[ESessionState.ABOUT_SIGN] = new Session_AboutSign(this);
             mDispatchDict[ESessionState.CHAT] = new Session_Chat(this);
         }
 

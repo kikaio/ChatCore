@@ -17,6 +17,7 @@ namespace ChatServer.Sessions
     {
         WELCOME,
         DH_SWAP,
+        ABOUT_SIGN,
         CHAT,
     }
 
@@ -136,6 +137,29 @@ namespace ChatServer.Sessions
                             Session.SetDhInfo(Convert.FromBase64String(dhKey), Convert.FromBase64String(dhIv));
                         });
                     }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public class Session_AboutSign : SessionState
+    {
+        public Session_AboutSign(UserSession _us) : base(_us)
+        {
+        }
+
+        public override void Dispatch_Req(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ChatCore.Enums.ECONTENT.SIGN_UP:
+
+                    break;
+                case ChatCore.Enums.ECONTENT.SIGN_IN:
+                    break;
+                case ChatCore.Enums.ECONTENT.SIGN_OUT:
                     break;
                 default:
                     break;

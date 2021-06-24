@@ -18,6 +18,7 @@ namespace ChatClient.Sessions
     {
         TRY_HELLO,
         TRY_GET_DH,
+        ABOUT_SIGN, //sign in, sing up, sign out 
         CHATABLE,
     }
 
@@ -151,4 +152,25 @@ namespace ChatClient.Sessions
         }
     }
 
+    public class State_About_Sign : SessionState
+    {
+        public State_About_Sign(UserSession _s) : base(_s)
+        {
+        }
+
+        public override void Dispatch_Req(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ECONTENT.SIGN_UP:
+                    break;
+                case ECONTENT.SIGN_IN:
+                    break;
+                case ECONTENT.SIGN_OUT:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
