@@ -17,6 +17,8 @@ namespace ChatClient.Sessions
         private Dictionary<ESessionState, SessionState> stateDict = new Dictionary<ESessionState, SessionState>();
         private CoreLogger logger = new ConsoleLogger();
 
+        internal string rsaPubicXml;
+
         public UserSession(long _sid, CoreSock _sock) : base(_sid, _sock)
         {
             Init();

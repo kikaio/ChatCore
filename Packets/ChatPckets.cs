@@ -47,6 +47,7 @@ namespace ChatCore.Packets
 
     public class HelloReq : ChatPacket
     {
+        public string publicRsaXml;
         public HelloReq()
             : base(PACKET_TYPE.REQ, ECONTENT.HELLO)
         {
@@ -62,11 +63,13 @@ namespace ChatCore.Packets
 
         public override void SerRead()
         {
+            publicRsaXml = Translate.Read<string>(data);
         }
 
         public override void SerWrite()
         {
             base.SerWrite();
+            Translate.Write(data, publicRsaXml);
             UpdateHeader();
         }
     }
@@ -74,7 +77,6 @@ namespace ChatCore.Packets
     public class WelcomeAns : ChatPacket
     {
         public long sId;
-
         public WelcomeAns()
             :base(PACKET_TYPE.ANS, ECONTENT.WELCOME)
         {

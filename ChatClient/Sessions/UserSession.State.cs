@@ -1,10 +1,13 @@
-﻿using ChatCore.Enums;
+﻿using ChatClient.Configs;
+using ChatCore.Enums;
 using ChatCore.Packets;
+using CoreNet.Cryptor;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static ChatCore.Packets.ChatNoti;
@@ -101,9 +104,17 @@ namespace ChatClient.Sessions
                     {
                         DH_Ans ans = new DH_Ans(_cp);
                         ans.SerRead();
-                        logger.WriteDebug("recv dh req");
+                        logger.WriteDebug("=======Before RSA Decrypt=========");
                         logger.WriteDebug($"recv dh key:{ans.dhKey}");
                         logger.WriteDebug($"recv dh iv:{ans.dhIV}");
+
+                        ans.dhKey = CryptHelper.RsaDecryptWithBase64(ans.dhKey, ConfigMgr.ClientConfig.privateParam);
+                        ans.dhIV = CryptHelper.RsaDecryptWithBase64(ans.dhIV, ConfigMgr.ClientConfig.privateParam);
+
+                        logger.WriteDebug("=======After RSA Decrypt=========");
+                        logger.WriteDebug($"recv dh key:{ans.dhKey}");
+                        logger.WriteDebug($"recv dh iv:{ans.dhIV}");
+
                         byte[] bytesDHKey = Convert.FromBase64String(ans.dhKey);
                         byte[] bytesDHIV = Convert.FromBase64String(ans.dhIV);
                         Session.SetDhInfo(bytesDHKey, bytesDHIV);

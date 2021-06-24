@@ -1,4 +1,5 @@
-﻿using ChatClient.Sessions;
+﻿using ChatClient.Configs;
+using ChatClient.Sessions;
 using ChatCore.Packets;
 using ChatCore.Protocols;
 using CoreNet.Jobs;
@@ -27,6 +28,7 @@ namespace ChatClient
 
         public override void ReadyToStart()
         {
+            ConfigMgr.Init();
             TranslateEx.Init();
             wDict["hb"] = new Worker("hb");
             long hbDelta = TimeSpan.FromMilliseconds(CoreSession.hbDelayMilliSec * 0.75f).Ticks;
@@ -127,6 +129,7 @@ namespace ChatClient
                 while (mSession.curState == ESessionState.TRY_HELLO)
                 {
                     HelloReq req = new HelloReq();
+                    req.publicRsaXml = ConfigMgr.ClientConfig.rsaPublicXml;
                     req.SerWrite();
                     await mSession.OnSendTAP(req);
                     logger.WriteDebug("send hello req");
