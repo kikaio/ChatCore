@@ -18,8 +18,11 @@ namespace ChatClient.Sessions
     {
         TRY_HELLO,
         TRY_GET_DH,
-        ABOUT_SIGN, //sign in, sing up, sign out 
-        CHATABLE,
+        ABOUT_SIGN, //before sign in, sing up, sign out 
+        SIGN_UP, //sign up
+        SIGN_IN, //sign in
+        CHATABLE, //after sign in
+        SIGN_OUT, //change state to about isgn after sign out 
     }
 
     public interface IDispatch
@@ -119,7 +122,7 @@ namespace ChatClient.Sessions
                         byte[] bytesDHKey = Convert.FromBase64String(ans.dhKey);
                         byte[] bytesDHIV = Convert.FromBase64String(ans.dhIV);
                         Session.SetDhInfo(bytesDHKey, bytesDHIV);
-                        Session.UpdateState(ESessionState.CHATABLE);
+                        Session.UpdateState(ESessionState.ABOUT_SIGN);
                         logger.WriteDebug("now client will send chat noti to server");
                     }
                     break;
@@ -133,6 +136,26 @@ namespace ChatClient.Sessions
     {
         public State_Chatable(UserSession _s) : base(_s)
         {
+        }
+
+        public override void Dispatch_Ans(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ECONTENT.REQ_RESULT:
+                    {
+                        var ret = new Result_Ans(_cp);
+                        ret.SerRead();
+                        if (ret.IsSuccessed)
+                        {   //sign out success
+                            logger.WriteDebug("Client sign out complete");
+                            Session.UpdateState(ESessionState.ABOUT_SIGN);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void Dispatch_Noti(ChatPacket _cp)
@@ -157,16 +180,80 @@ namespace ChatClient.Sessions
         public State_About_Sign(UserSession _s) : base(_s)
         {
         }
+    }
+    public class State_Sign_Up : SessionState
+    {
+        public State_Sign_Up(UserSession _s) : base(_s)
+        {
+        }
+
+        public override void Dispatch_Ans(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ECONTENT.REQ_RESULT:
+                    {
+                        var ans = new Result_Ans(_cp);
+                        ans.SerRead();
+                        if (ans.IsSuccessed)
+                            logger.WriteDebug("Sign up completed");
+                        else
+                            logger.WriteDebug("Sign up failed, maybe duplicated nickname");
+                        Session.UpdateState(ESessionState.ABOUT_SIGN);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    public class State_Sign_In : SessionState
+    {
+        public State_Sign_In(UserSession _s) : base(_s)
+        {
+        }
+
+        public override void Dispatch_Ans(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ECONTENT.REQ_RESULT:
+                    {
+                        var ans = new Result_Ans(_cp);
+                        ans.SerRead();
+                        if (ans.IsSuccessed)
+                            logger.WriteDebug("Sign in completed");
+                        else
+                            logger.WriteDebug("Sign In failed, Check NickName or pw");
+                        Session.UpdateState(ESessionState.CHATABLE);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public class State_Sign_Out : SessionState
+    {
+        public State_Sign_Out(UserSession _s) : base(_s)
+        {
+        }
 
         public override void Dispatch_Req(ChatPacket _cp)
         {
             switch (_cp.cType)
             {
-                case ECONTENT.SIGN_UP:
-                    break;
-                case ECONTENT.SIGN_IN:
-                    break;
-                case ECONTENT.SIGN_OUT:
+                case ECONTENT.REQ_RESULT:
+                    {
+                        var ans = new Result_Ans(_cp);
+                        ans.SerRead();
+                        if (ans.IsSuccessed)
+                            logger.WriteDebug("Sign out completed");
+                        else
+                            logger.WriteDebug("Sign out failed, Check NickName or pw");
+                        Session.UpdateState(ESessionState.ABOUT_SIGN);
+                    }
                     break;
                 default:
                     break;

@@ -254,10 +254,6 @@ namespace ChatCore.Packets
 
     public class SignOut_Req : ChatPacket
     {
-        public string NickName { get; set; }
-        public string Pw { get; set; }
-
-
         public SignOut_Req()
             : base(PACKET_TYPE.REQ, ECONTENT.SIGN_UP)
         {
@@ -272,15 +268,11 @@ namespace ChatCore.Packets
 
         public override void SerRead()
         {
-            NickName = Translate.Read<string>(data);
-            Pw = Translate.Read<string>(data);
         }
 
         public override void SerWrite()
         {
             base.SerWrite();
-            Translate.Write(data, NickName);
-            Translate.Write(data, Pw);
             UpdateHeader();
         }
     }

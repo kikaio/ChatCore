@@ -29,6 +29,9 @@ namespace ChatClient.Sessions
             stateDict[ESessionState.TRY_HELLO] = new State_Try_Hello(this);
             stateDict[ESessionState.TRY_GET_DH] = new State_Try_Get_dh(this);
             stateDict[ESessionState.ABOUT_SIGN] = new State_About_Sign(this);
+            stateDict[ESessionState.SIGN_UP] = new State_Sign_Up(this);
+            stateDict[ESessionState.SIGN_IN] = new State_Sign_In(this);
+            stateDict[ESessionState.SIGN_OUT] = new State_Sign_Out(this);
             stateDict[ESessionState.CHATABLE] = new State_Chatable(this);
         }
 

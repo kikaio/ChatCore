@@ -1,5 +1,6 @@
 ﻿using ChatCore.Packets;
 using ChatCore.Protocols;
+using ChatServer.DataBases.Common;
 using ChatServer.Sessions;
 using CoreNet.Jobs;
 using CoreNet.Networking;

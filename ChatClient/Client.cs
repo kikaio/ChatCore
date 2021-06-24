@@ -64,18 +64,79 @@ namespace ChatClient
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {
                     var input = Console.ReadLine();
-                    if (mSession.curState != ESessionState.CHATABLE)
+                    switch (mSession.curState)
                     {
-                        logger.WriteDebug($"[sesstion state]{mSession.curState}");
-                    }
-                    else
-                    {
-                        ChatNoti noti = new ChatNoti();
-                        noti.sId = mSession.SessionId;
-                        noti.msg = input;
-                        noti.SerWrite();
-                        await mSession.OnSendTAP(noti);
-                        logger.WriteDebug("sended chat noti");
+                        case ESessionState.ABOUT_SIGN:
+                            {
+                                //sign up : signup `nickname` `pw`;
+                                //sign in : signin `nickname` `pw`;
+                                //sign out : signout `nickname` `pw`;
+                                string[] cmds = input.Split(' ');
+                                if (cmds.Length != 3)
+                                    logger.Error("cmd is invalid");
+                                else
+                                {
+                                    var cmd = cmds[0];
+                                    var nickname = cmds[1];
+                                    var pw = cmds[2];
+                                    switch (cmd.ToUpper())
+                                    {
+                                        case "SIGNUP":
+                                            mSession.UpdateState(ESessionState.SIGN_UP);
+                                            Task.Run(async () => {
+                                                var req = new SignUp_Req();
+                                                req.NickName = nickname;
+                                                req.Pw = pw;
+                                                req.SerWrite();
+                                                await mSession.OnSendTAP(req);
+                                            });
+                                            break;
+                                        case "SIGNIN":
+                                            mSession.UpdateState(ESessionState.SIGN_IN);
+                                            Task.Run(async () => {
+                                                var req = new SignIn_Req();
+                                                req.NickName = nickname;
+                                                req.Pw = pw;
+                                                req.SerWrite();
+                                                await mSession.OnSendTAP(req);
+                                            });
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                            break;
+                        //case ESessionState.SIGN_UP:
+                        //    break;
+                        //case ESessionState.SIGN_IN:
+                        //    break;
+                        //case ESessionState.SIGN_OUT:
+                        //    break;
+                        case ESessionState.CHATABLE:
+                            {
+                                if (input.ToUpper().StartsWith("SIGNOUT"))
+                                {
+                                    mSession.UpdateState(ESessionState.SIGN_OUT);
+                                    var req = new SignOut_Req();
+                                    req.SerWrite();
+                                    await mSession.OnSendTAP(req);
+                                    logger.WriteDebug("Request signout from server");
+                                }
+                                else
+                                {
+                                    ChatNoti noti = new ChatNoti();
+                                    noti.sId = mSession.SessionId;
+                                    noti.msg = input;
+                                    noti.SerWrite();
+                                    await mSession.OnSendTAP(noti);
+                                    logger.WriteDebug("sended chat noti");
+                                }
+                            }
+                            break;
+                        default:
+                            logger.WriteDebug($"[sesstion state]{mSession.curState}");
+                            break;
                     }
                 }
             }));

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using CoreNet.Cryptor;
 
 namespace ChatServer.DataBases.Common
 {
@@ -30,15 +31,50 @@ namespace ChatServer.DataBases.Common
 
         public static async Task<bool> SignUp(string _nickName, string _plainPW)
         {
+            if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
+                return false;
+            using (var c = new CommonContext())
+            {
+                var ret = await c.Accounts.Where(x=>x.NickName == _nickName).SingleOrDefaultAsync();
+                if (ret == default(Account))
+                {
+                    var newAcc = new Account();
+                    newAcc.NickName = _nickName;
+                    newAcc.Pw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+                    c.Accounts.Add(newAcc);
+                    await c.SaveChangesAsync();
+                    return true;
+                }
+            }
             return false;
         }
         public static async Task<bool> SignIn(string _nickName, string _plainPW)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
+                return false;
+            using (var c = new CommonContext())
+            {
+                var acc = await c.Accounts.Where(x => x.NickName == _nickName).SingleOrDefaultAsync();
+                if (acc == default(Account))
+                    return false;
+                return acc.Pw == CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+            }
         }
         public static async Task<bool> SignOut(string _nickName, string _plainPW)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
+                return false;
+            using (var c = new CommonContext())
+            {
+                var shaedPw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+                var target = await c.Accounts.Where(x => x.NickName == _nickName && x.Pw == shaedPw).SingleOrDefaultAsync();
+                if (target == default(Account))
+                    return false;
+                target.UpdatedDate = DateTime.UtcNow;
+                target.IsSignOut = true;
+                await c.SaveChangesAsync();
+            }
+            return true;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ChatCore.Packets;
 using ChatServer.Configs;
+using ChatServer.DataBases.Common;
 using CoreNet.Cryptor;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
@@ -131,7 +132,7 @@ namespace ChatServer.Sessions
 
                             ans.SerWrite();
 
-                            Session.SetState(ESessionState.CHAT);
+                            Session.SetState(ESessionState.ABOUT_SIGN);
                             await Session.OnSendTAP(ans);
                             //Encrypt communication start
                             Session.SetDhInfo(Convert.FromBase64String(dhKey), Convert.FromBase64String(dhIv));
@@ -155,11 +156,32 @@ namespace ChatServer.Sessions
             switch (_cp.cType)
             {
                 case ChatCore.Enums.ECONTENT.SIGN_UP:
-
+                    {
+                        var req = new SignUp_Req(_cp);
+                        req.SerRead();
+                        Task.Run(async () => {
+                            var ret = await Account.SignUp(req.NickName, req.Pw);
+                            Result_Ans ans = new Result_Ans();
+                            ans.IsSuccessed = ret;
+                            ans.SerWrite();
+                            await Session.OnSendTAP(ans);
+                        });
+                    }
                     break;
                 case ChatCore.Enums.ECONTENT.SIGN_IN:
-                    break;
-                case ChatCore.Enums.ECONTENT.SIGN_OUT:
+                    {
+                        var req = new SignIn_Req(_cp);
+                        req.SerRead();
+                        Task.Run(async () => {
+                            var ret = await Account.SignIn(req.NickName, req.Pw);
+                            Result_Ans ans = new Result_Ans();
+                            ans.IsSuccessed = ret;
+                            ans.SerWrite();
+                            if (ret == true)
+                                Session.SetState(ESessionState.CHAT);
+                            await Session.OnSendTAP(ans);
+                        });
+                    }
                     break;
                 default:
                     break;
@@ -171,6 +193,27 @@ namespace ChatServer.Sessions
     {
         public Session_Chat(UserSession _us) : base(_us)
         {
+        }
+
+        public override void Dispatch_Req(ChatPacket _cp)
+        {
+            switch (_cp.cType)
+            {
+                case ChatCore.Enums.ECONTENT.SIGN_OUT:
+                    {
+                        Session.SetState(ESessionState.ABOUT_SIGN);
+                        Task.Run(async () => {
+                            //session logout logic
+                            var ret = new Result_Ans();
+                            ret.IsSuccessed = true;
+                            await Session.OnSendTAP(ret);
+                            logger.WriteDebug($"{Session.SessionId} is sign out, byebye");
+                        });
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void Dispatch_Noti(ChatPacket _cp)
