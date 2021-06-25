@@ -37,19 +37,27 @@ namespace ChatServer.DataBases.Common
         {
             if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
                 return false;
-            using (var c = new CommonContext())
+            try
             {
-                var ret = await c.Accounts.Where(x=>x.NickName == _nickName).SingleOrDefaultAsync();
-                if (ret == default(Account))
+                using (var c = new CommonContext())
                 {
-                    var newAcc = new Account();
-                    newAcc.NickName = _nickName;
-                    newAcc.Pw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
-                    c.Accounts.Add(newAcc);
-                    await c.SaveChangesAsync();
-                    logger.WriteDebug($"signup complete-{_nickName}");
-                    return true;
+                    var ret = await c.Accounts.Where(x => x.NickName == _nickName).SingleOrDefaultAsync();
+                    if (ret == default(Account))
+                    {
+                        var newAcc = new Account();
+                        newAcc.NickName = _nickName;
+                        newAcc.Pw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+                        c.Accounts.Add(newAcc);
+                        await c.SaveChangesAsync();
+                        logger.WriteDebug($"signup complete-{_nickName}");
+                        return true;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                logger.Error(e.ToString());
+                return false;
             }
             return false;
         }

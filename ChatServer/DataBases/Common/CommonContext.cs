@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ChatServer.DataBases.Common
 {
-    [DbConfigurationType(typeof(MySqlEFConfiguration))]
+    //[DbConfigurationType(typeof(MySqlEFConfiguration))]
     public class CommonContext : CoreDbContext
     {
         private const string commonDbConfName = "COMMON_DB";
@@ -18,6 +18,7 @@ namespace ChatServer.DataBases.Common
         public CommonContext()
             : this(ConfigMgr.DbConfDict[commonDbConfName]?.GetConnStr())
         {
+            Console.WriteLine($"Db Conn Str : {ConfigMgr.DbConfDict[commonDbConfName]?.GetConnStr()}");
         }
 
         protected CommonContext(string _connStr) : base(_connStr)

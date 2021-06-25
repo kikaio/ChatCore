@@ -38,13 +38,13 @@ namespace ChatServer.Configs
             if (Port == 0)
             {
                 IsNeedCreateFile = true;
-                Port = 3307;
+                Port = 3306;
             }
 
             if (Database == "")
             {
                 IsNeedCreateFile = true;
-                Database = "TestDB";
+                Database = "test_db";
             }
         }
 
