@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using CoreNet.Cryptor;
+using CoreNet.Utils;
+using CoreNet.Utils.Loggers;
 
 namespace ChatServer.DataBases.Common
 {
@@ -29,6 +31,8 @@ namespace ChatServer.DataBases.Common
         public bool IsBlocked { get; set; }
         public bool IsSignOut { get; set; }
 
+        private static CoreLogger logger = new ConsoleLogger();
+
         public static async Task<bool> SignUp(string _nickName, string _plainPW)
         {
             if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
@@ -43,6 +47,7 @@ namespace ChatServer.DataBases.Common
                     newAcc.Pw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
                     c.Accounts.Add(newAcc);
                     await c.SaveChangesAsync();
+                    logger.WriteDebug($"signup complete-{_nickName}");
                     return true;
                 }
             }

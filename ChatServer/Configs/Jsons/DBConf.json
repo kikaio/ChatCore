@@ -3,16 +3,16 @@
     "SERVER": "127.0.0.1",
     "PORT": 3306,
     "DATABASE": "TestDB",
-    "UID": "sweetmeats_boy",
-    "PASSWORD": "test",
+    "UID": "root",
+    "PASSWORD": "tester",
     "CONNECTIONTIMEOUT" :  10000
   },
   "DB_NOT_USE": {
     "SERVER": "127.0.0.1",
     "PORT": 3306,
     "DATABASE": "TestDB",
-    "UID": "sweetmeats_boy",
-    "PASSWORD": "test",
+    "UID": "root",
+    "PASSWORD": "tester",
     "CONNECTIONTIMEOUT": 10000
   }
 }
