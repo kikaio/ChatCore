@@ -108,6 +108,7 @@
     <None Include="App.config" />
     <Compile Include="Sessions\UserSession.Conf.cs" />
     <None Include="Configs\jsons\ClientConfig.json" />
+    <None Include="Configs\jsons\RedisConfig.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChatCore.csproj">
