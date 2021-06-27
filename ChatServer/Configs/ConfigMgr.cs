@@ -13,6 +13,8 @@ namespace ChatServer.Configs
     {
         public static ServerConf ServerConf { get; private set; }
         public static Dictionary<string, DBConf> DbConfDict { get; private set; } = new Dictionary<string, DBConf>();
+        public static Dictionary<string, RedisConf> RedisServiceDict { get; private set; } = new Dictionary<string, RedisConf>();
+
         public static void Init()
         {
             try
@@ -20,10 +22,10 @@ namespace ChatServer.Configs
                 var appSettings = ConfigurationManager.AppSettings;
                 var serverConfPath = appSettings.Get("ServerConfig");
                 var dbConfPath = appSettings.Get("DBConfig");
-
+                var redisConfPath = appSettings.Get("RedisConfig");
                 ReadyServerConfig(serverConfPath);
                 ReadyDbConfig(dbConfPath);
-
+                
             }
             catch (Exception e)
             {
@@ -60,6 +62,28 @@ namespace ChatServer.Configs
                 }
                 var conf = new DBConf(confToken);
                 DbConfDict[jc.Key] = conf;
+            }
+        }
+
+        private static void ReadyRedisService(string _confPath)
+        {
+            var confStr = "";
+            using (var fs = new StreamReader(_confPath, Encoding.UTF8))
+            {
+                confStr = fs.ReadToEnd();
+            }
+
+            JObject confDict = JObject.Parse(confStr);
+            foreach (var jc in confDict)
+            {
+                Console.WriteLine($"{jc.Key} service config check");
+                var jobj = jc.Value as JObject;
+                if (jobj == default(JObject))
+                {
+                    continue;
+                }
+                var conf = new RedisConf(jobj);
+                RedisServiceDict[jc.Key] = conf;
             }
         }
 
