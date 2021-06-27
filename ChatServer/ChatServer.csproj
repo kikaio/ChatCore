@@ -141,6 +141,7 @@
   <ItemGroup>
     <Compile Include="Configs\ConfigMgr.cs" />
     <Compile Include="Configs\DBConf.cs" />
+    <Compile Include="Configs\RedisConf.cs" />
     <Compile Include="Configs\ServerConf.cs" />
     <Compile Include="DataBases\Common\Account.cs" />
     <Compile Include="DataBases\Common\CommonContext.cs" />
