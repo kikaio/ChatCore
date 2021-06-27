@@ -1,5 +1,6 @@
 ﻿using ChatCore.Packets;
 using ChatCore.Protocols;
+using ChatServer.Configs;
 using ChatServer.DataBases.Common;
 using ChatServer.Sessions;
 using CoreNet.Jobs;
@@ -19,6 +20,8 @@ namespace ChatServer
     public class Server : CoreNetwork
     {
         public static Server Inst { get; } = new Server();
+
+        public long ChatServerNo { get; protected set; }
 
         private Dictionary<string, Worker> wDict = new Dictionary<string, Worker>();
         private CoreTCP mListen;
@@ -42,6 +45,9 @@ namespace ChatServer
         
         public override void ReadyToStart()
         {
+            //config files init
+            ConfigMgr.Init();
+
             TranslateEx.Init();
 
             ep = new IPEndPoint(IPAddress.Any, port);

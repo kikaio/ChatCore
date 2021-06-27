@@ -17,8 +17,6 @@ namespace ChatServer
             CoreLogger logger = new ConsoleLogger();
             try
             {
-                //config files init
-                ConfigMgr.Init();
 
                 Server.Inst.ReadyToStart();
                 Server.Inst.Start();
