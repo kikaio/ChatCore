@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatServer.Redis.Data
+namespace ChatServer.Redis
 {
     public class RedisChatServer 
     {
