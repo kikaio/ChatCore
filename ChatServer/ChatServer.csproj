@@ -154,15 +154,18 @@
     <Compile Include="Redis\RedisAuth.cs" />
     <Compile Include="Redis\RedisDB.cs" />
     <Compile Include="Redis\Data\RedisSessionData.cs" />
+    <Compile Include="Redis\RedisService.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="Sessions\Events\CoreArgs.cs" />
+    <Compile Include="Sessions\Events\UserSession.Events.cs" />
     <Compile Include="Sessions\UserSession.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Configs\Jsons\DBConf.json" />
-    <None Include="Configs\Jsons\RedisConfig.json" />
+    <None Include="Configs\Jsons\RedisConf.json" />
     <None Include="Configs\Jsons\ServerConf.json" />
-    <Compile Include="Sessions\UserSession.State.cs" />
+    <Compile Include="Sessions\SessionState.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

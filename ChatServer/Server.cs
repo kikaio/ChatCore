@@ -2,7 +2,9 @@
 using ChatCore.Protocols;
 using ChatServer.Configs;
 using ChatServer.DataBases.Common;
+using ChatServer.Redis;
 using ChatServer.Sessions;
+using ChatServer.Sessions.Events;
 using CoreNet.Jobs;
 using CoreNet.Networking;
 using CoreNet.Protocols;
@@ -21,10 +23,9 @@ namespace ChatServer
     {
         public static Server Inst { get; } = new Server();
 
-        public long ChatServerNo { get; protected set; }
-
         private Dictionary<string, Worker> wDict = new Dictionary<string, Worker>();
         private CoreTCP mListen;
+
         private void ReadyWorkers()
         {
             wDict["pkg"] = new Worker();
@@ -43,16 +44,51 @@ namespace ChatServer
             }));
         }
 
-        private void ReadyRedisService()
+        private void SetSessionEvents(UserSession _s)
         {
+            _s.Connected += async (_sender, _args) => {
+                SessionMgr.Inst.AddSession(_s);
+                var isSuccess = await RedisService.Auth.AddNewSessionInfo(name, _s.Token, UserSession.TokenTTL.Milliseconds);
+                if (isSuccess == false)
+                {
+                    logger.WriteDebug("something is wrong... check redis server");
+                    return;
+                }
+                //this server's sessio cnt increase.
+                await RedisService.ChatServer.IncreaseSessionCnt(name);
+            };
+
+            //call when success authenticated
+            _s.Authenticated += async (_sender, _args) => {
+                //get Account id and to something for redis server
+                var args = _args as AuthenticateArgs;
+                if (args == default(CoreArgs))
+                    return;
+                long aid = args.AId;
+
+            };
+
+            _s.Disconnected += async (_sender, _args) => {
+                //remove key and value about this session.
+                await RedisService.Auth.RemoveTokenInfo(_s.Token);
+                await RedisService.Auth.RemoveTokenFromAccount(_s.Token, _s.SessionId);
+                //decreament session cnt in this server.
+                await RedisService.ChatServer.DecreamentSessionCnt(name);
+                logger.WriteDebug($"Session[{_s.SessionId}:{_s.Token}] DisConnected");
+                _s.DoDispose(true);
+            };
+
 
         }
-
         public override void ReadyToStart()
         {
             //config files init
             ConfigMgr.Init();
 
+            name = "Chat_001";
+
+            //overwirte if servername already exist in redis
+            RedisService.Init(name, true);
             TranslateEx.Init();
 
             ep = new IPEndPoint(IPAddress.Any, port);
@@ -82,11 +118,27 @@ namespace ChatServer
                     Task.Factory.StartNew(async () => {
                         var sid = newSId;
                         logger.WriteDebug($"new session accepted, id : {sid}");
+
                         UserSession nSession = new UserSession(newSId, tcp, this);
-                        SessionMgr.Inst.AddSession(nSession);
+                        SetSessionEvents(nSession);
+
+                        nSession.OnConnected(this, null);
+                        
                         while (isDown ==false && nSession.Sock.Sock.Connected)
                         {
                             var p = await nSession.OnRecvTAP();
+                            //disconnected
+                            if (p == default(Packet))
+                            {
+                                var args = new DisconnArgs
+                                {
+                                    Desc = "this session failed recv packet",
+                                    DisconnDt = DateTime.UtcNow,
+                                    SId = nSession.SessionId,
+                                };
+                                nSession.OnDisConnected(this, args);
+                                break;
+                            }
                             if (p.GetHeader() == 0)
                             {
                                 logger.WriteDebug($"Session {nSession.SessionId}'s hb update");

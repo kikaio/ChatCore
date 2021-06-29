@@ -1,4 +1,5 @@
 ﻿using ChatCore.Packets;
+using CoreNet.Cryptor;
 using CoreNet.Networking;
 using CoreNet.Sockets;
 using CoreNet.Utils;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ChatServer.Sessions
 {
-    public class UserSession : CoreSession
+    public partial class UserSession : CoreSession
     {
         public ESessionState curState { get; private set; } = ESessionState.WELCOME;
         private Dictionary<ESessionState, SessionState> mDispatchDict = new Dictionary<ESessionState, SessionState>();
@@ -21,14 +22,29 @@ namespace ChatServer.Sessions
 
         internal RSAParameters rsaPublicParam;
 
+        public string Token { get; private set; }
+        private string TokenXorKey { get; } = "simpleisbest";
+
+        public static TimeSpan TokenTTL { get; } = TimeSpan.FromMinutes(10);
+
         public UserSession(long _sid, CoreSock _sock, Server _server) : base(_sid, _sock)
         {
             server = _server;
             Init();
         }
 
+        private string GenSessionToken()
+        {
+            string saltVal = "Hmmteresting";
+            string simpleXoredToken = $"{SessionId}_{saltVal}_{server.name}";
+            var bytes = Encoding.UTF8.GetBytes(TokenXorKey);
+            var xoredBytes = CryptHelper.XorEncrypt(Encoding.UTF8.GetBytes(simpleXoredToken), bytes);
+            return Encoding.UTF8.GetString(xoredBytes);
+        }
+
         private void Init()
         {
+            Token = GenSessionToken();
             mDispatchDict[ESessionState.WELCOME] = new Session_Welcome(this);
             mDispatchDict[ESessionState.DH_SWAP] = new Session_DhSwap(this);
             mDispatchDict[ESessionState.ABOUT_SIGN] = new Session_AboutSign(this);

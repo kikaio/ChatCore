@@ -15,6 +15,8 @@ namespace ChatServer.Redis
     {
         public string Instkey { get; protected set; } = "ChatServer:Inst";
         public string DataKey { get; protected set; } = "ChatServer:Data";
+        public string ChatKey { get; protected set; } = "ChatServers";
+
 
         private RedisDB redis;
         private CoreLogger logger = new ConsoleLogger();
@@ -26,7 +28,7 @@ namespace ChatServer.Redis
             DbName = _DBName;
         }
 
-        public void Init(string _instName)
+        public void Init(string _instName, bool isOverwrite = false)
         {
             if (ConfigMgr.RedisServiceDict.ContainsKey(DbName) == false)
             {
@@ -40,7 +42,7 @@ namespace ChatServer.Redis
             else
                 logger.WriteDebug($"Redis connect successed : {DbName}");
 
-            Task.Run(async()=> await RegistServerInst(_instName));
+            Task.Run(async()=> await RegistServerInstToRedis(_instName, isOverwrite));
         }
 
 
@@ -48,21 +50,31 @@ namespace ChatServer.Redis
         /// Server Instance data regist to redis db
         /// </summary>
         /// <param name="_name"></param>
-        public async Task<bool> RegistServerInst(string _name)
+        public async Task<bool> RegistServerInstToRedis(string _name, bool isOverwrite = false)
         {
             if (await GetServerinst(_name) != "")
             {
-                logger.Error($"Server Instance named {_name} is Exist!!, check redis or instance");
-                return false;
+                if (isOverwrite == false)
+                {
+                    logger.Error($"Server Instance named {_name} is Exist!!, check redis or instance");
+                    return false;
+                }
+                else
+                {
+                    await DeleteServerFromRedis(_name);
+                }
             }
             await SetServerInst(_name);
             await SetServerData(_name);
+            await AddToChatList(_name);
             return true;
         }
 
-        public async Task DeleteServerInst(string _name)
+        public async Task DeleteServerFromRedis(string _name)
         {
-
+            await DeleteServerInst(_name);
+            await DeleteServerData(_name);
+            await DeleteFromChatList(_name);
         }
 
         private async Task<string> GetServerinst(string _name)
@@ -71,11 +83,29 @@ namespace ChatServer.Redis
             return ret;
         }
 
+        private async Task AddToChatList(string _name)
+        {
+            var curListCnt = await redis.Database.ListRightPushAsync(ChatKey, _name, StackExchange.Redis.When.NotExists);
+            logger.WriteDebug($"ChatServer List registed count in reids ChatServers is {curListCnt}");
+        }
+
+        private async Task DeleteFromChatList(string _name)
+        {
+            var afterListCnt = await redis.Database.ListRemoveAsync(ChatKey, _name);
+            logger.WriteDebug($"Delete {_name} from ChatServer List, remain cnt is {afterListCnt}");
+        }
+
         private async Task SetServerInst(string _name)
         {
             //vlaue is sessionCnt
             await redis.SetStr($"{Instkey}:{_name}", 0.ToString());
         }
+
+        private async Task DeleteServerInst(string _name)
+        {
+            await redis.Database.KeyDeleteAsync($"{Instkey}:{_name}");
+        }
+
 
         private async Task<Tuple<string, long>> GetServerData(string _name)
         {
@@ -99,6 +129,10 @@ namespace ChatServer.Redis
             await redis.SetStr($"{DataKey}:{_name}", dataStr);
         }
 
+        private async Task DeleteServerData(string _name)
+        {
+            await redis.Database.KeyDeleteAsync($"{DataKey}:{_name}");
+        }
 
         public async Task IncreaseSessionCnt(string _name)
         {
@@ -109,7 +143,5 @@ namespace ChatServer.Redis
         {
             await redis.Database.StringDecrementAsync($"{Instkey}:{_name}");
         }
-
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ChatServer.Configs;
 using ChatServer.Redis.Data;
+using ChatServer.Sessions;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using StackExchange.Redis;
@@ -20,6 +21,7 @@ namespace ChatServer.Redis
         public string TokenKey { get; private set; } = "Auth:Token";
         public string ChatServerKey { get; private set; } = "Auth:Chat";
         public string AccountListKey { get; private set; } = "Auth:Account";
+
         public RedisConf Conf { get; private set; }
         public string DbName { get; private set; }
         protected RedisDB redis;
@@ -48,13 +50,41 @@ namespace ChatServer.Redis
                 logger.WriteDebug($"Redis connect successed : {DbName}");
         }
 
-        public async Task<bool> AddNewSessionInfo(string _token, long _accId, long _expireMilliSec)
+        public async Task<bool> AddNewSessionInfo(string _serverName, string _token, long _expireMilliSec)
         {
             if (await redis.Database.KeyExistsAsync($"{TokenKey}:{_token}"))
+            {
+                await RemoveTokenInfo(_token);
                 return false;
-            await redis.SetStr($"{TokenKey}:{_token}", _accId.ToString(), _expireMilliSec);
-            await redis.SetStr($"{ChatServerKey}:{_token}", Server.Inst.ChatServerNo.ToString(), _expireMilliSec);
+            }
+            await redis.SetStr($"{ChatServerKey}:{_token}", Server.Inst.name, _expireMilliSec);
+            return true;
+        }
 
+        public async Task AddTokenToAccount(string _token, long _aid)
+        {
+            if (_aid < 1)
+            {
+                logger.Error($"Account Id[{_aid}] is invalid value");
+                return;
+            }
+            await redis.Database.StringSetAsync($"{TokenKey}:{_token}", _aid.ToString(), UserSession.TokenTTL);
+            await redis.Database.ListLeftPushAsync($"{AccountListKey}:{_aid.ToString()}", _token);
+        }
+
+        public async Task RemoveTokenFromAccount(string _token, long _aid)
+        {
+            if(_aid > 0)
+                await redis.Database.ListRemoveAsync($"{AccountListKey}:{_aid.ToString()}", _token);
+            await redis.Database.KeyDeleteAsync($"{TokenKey}:{_token}");
+        }
+
+        public async Task<bool> RemoveTokenInfo(string _token)
+        {
+            
+            await redis.Database.KeyDeleteAsync($"{TokenKey}:{_token}");
+            // remove this sessison where connected server name
+            await redis.Database.KeyDeleteAsync($"{ChatServerKey}:{_token}");
             return true;
         }
 
@@ -82,12 +112,6 @@ namespace ChatServer.Redis
                     retList.Add(redisVal.ToString());
                 return retList;
             }
-        }
-
-
-        public async Task DeleteToken(string _token)
-        {
-            await redis.Database.KeyDeleteAsync($"{TokenKey}:{_token}");
         }
 
         public async Task<bool> CheckTokenAndAccountId(string _token, long _accid)

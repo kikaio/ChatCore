@@ -71,7 +71,7 @@ namespace ChatServer.Redis
         public async Task<string> GetStr(string _key)
         {
             var ret = await Database.StringGetAsync(_key);
-            if (ret.IsNull)
+            if (ret.IsNullOrEmpty)
                 return "";
             return ret;
         }
@@ -101,6 +101,7 @@ namespace ChatServer.Redis
             catch (Exception e)
             {
                 //logging?
+                logger.Error(e.ToString());
             }
             return default(T);
         }
