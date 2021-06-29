@@ -13,6 +13,7 @@ namespace ChatServer.Configs
 {
     public class ServerConf : JsonicObj
     {
+        public string Ip { get; set; }
         public int Port { get; set; }
         public int Max_Thread_Cnt { get; set; }
         public string Category { get; set; }

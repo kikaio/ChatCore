@@ -25,7 +25,7 @@ namespace ChatServer.Configs
                 var redisConfPath = appSettings.Get("RedisConfig");
                 ReadyServerConfig(serverConfPath);
                 ReadyDbConfig(dbConfPath);
-                
+                ReadyRedisService(redisConfPath);
             }
             catch (Exception e)
             {

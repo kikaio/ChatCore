@@ -42,7 +42,12 @@ namespace ChatServer
                 }
             }));
         }
-        
+
+        private void ReadyRedisService()
+        {
+
+        }
+
         public override void ReadyToStart()
         {
             //config files init

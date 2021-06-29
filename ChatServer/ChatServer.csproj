@@ -149,6 +149,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Redis\Data\IRedisData.cs" />
+    <Compile Include="Redis\Data\RedisChatServer.cs" />
+    <Compile Include="Redis\Data\RedisServerData.cs" />
     <Compile Include="Redis\RedisAuth.cs" />
     <Compile Include="Redis\RedisDB.cs" />
     <Compile Include="Redis\Data\RedisSessionData.cs" />
