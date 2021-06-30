@@ -77,8 +77,6 @@ namespace ChatServer
                 logger.WriteDebug($"Session[{_s.SessionId}:{_s.Token}] DisConnected");
                 _s.DoDispose(true);
             };
-
-
         }
         public override void ReadyToStart()
         {
