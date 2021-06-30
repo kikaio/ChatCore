@@ -22,5 +22,6 @@ namespace ChatServer.Sessions.Events
         public long AId { get; set; }
         public string NickName { get; set; }
         public DateTime AuthenticatedDt { get; set; }
+        public string Token { get; set; }
     }
 }

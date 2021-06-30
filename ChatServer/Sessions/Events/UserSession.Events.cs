@@ -27,6 +27,15 @@ namespace ChatServer.Sessions
             Authenticated?.Invoke(_s, _e);
             logger.WriteDebugTrace();
         }
+
+        public delegate void SignOutDelegate(Server _s, CoreArgs _e);
+        public event SignOutDelegate SignOuted;
+        public void OnSignOut(Server _s, CoreArgs _e)
+        {
+            SignOuted?.Invoke(_s, _e);
+            logger.WriteDebugTrace();
+        }
+
         #endregion
 
 

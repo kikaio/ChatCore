@@ -1,6 +1,7 @@
 ﻿using ChatCore.Packets;
 using ChatServer.Configs;
 using ChatServer.DataBases.Common;
+using ChatServer.Sessions.Events;
 using CoreNet.Cryptor;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
@@ -175,10 +176,18 @@ namespace ChatServer.Sessions
                         Task.Run(async () => {
                             var ret = await Account.SignIn(req.NickName, req.Pw);
                             Result_Ans ans = new Result_Ans();
-                            ans.IsSuccessed = ret;
+                            ans.IsSuccessed = ret != default(Account);
                             ans.SerWrite();
-                            if (ret == true)
+                            if (ans.IsSuccessed)
+                            {
                                 Session.SetState(ESessionState.CHAT);
+                                var arg = new AuthenticateArgs();
+                                arg.AId = ret.Id;
+                                arg.NickName = ret.NickName;
+                                arg.Token = Session.Token;
+                                arg.AuthenticatedDt = DateTime.UtcNow;
+                                Session.OnAuthenticated(Server.Inst, arg);
+                            }
                             await Session.OnSendTAP(ans);
                         });
                     }

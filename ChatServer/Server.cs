@@ -61,11 +61,11 @@ namespace ChatServer
             //call when success authenticated
             _s.Authenticated += async (_sender, _args) => {
                 //get Account id and to something for redis server
-                var args = _args as AuthenticateArgs;
-                if (args == default(CoreArgs))
+                var arg = _args as AuthenticateArgs;
+                if (arg == default(AuthenticateArgs))
                     return;
-                long aid = args.AId;
-
+                logger.WriteDebug($"[Sign in : {arg.NickName}] - token : {arg.Token}");
+                await RedisService.Auth.AddTokenToAccount(arg.Token, arg.AId); 
             };
 
             _s.Disconnected += async (_sender, _args) => {

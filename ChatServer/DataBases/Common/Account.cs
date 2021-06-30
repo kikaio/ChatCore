@@ -61,16 +61,19 @@ namespace ChatServer.DataBases.Common
             }
             return false;
         }
-        public static async Task<bool> SignIn(string _nickName, string _plainPW)
+        public static async Task<Account> SignIn(string _nickName, string _plainPW)
         {
             if (string.IsNullOrWhiteSpace(_nickName) || string.IsNullOrWhiteSpace(_plainPW))
-                return false;
+                return default(Account);
             using (var c = new CommonContext())
             {
                 var acc = await c.Accounts.Where(x => x.NickName == _nickName).SingleOrDefaultAsync();
-                if (acc == default(Account))
-                    return false;
-                return acc.Pw == CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+                if (acc != default(Account))
+                {
+                    if (acc.Pw == CryptHelper.PlainStrToBase64WithSha256(_plainPW))
+                        return acc;
+                }
+                return default(Account);
             }
         }
         public static async Task<bool> SignOut(string _nickName, string _plainPW)
