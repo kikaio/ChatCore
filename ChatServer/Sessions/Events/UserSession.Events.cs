@@ -19,7 +19,7 @@ namespace ChatServer.Sessions
         }
         #endregion
 
-        #region Authenticated (or sign in)
+        #region Authenticated (ex : sign in)
         public delegate void AuthenticatedDelegate(Server _s, CoreArgs _e);
         public event AuthenticatedDelegate Authenticated;
         public void OnAuthenticated(Server _s, CoreArgs _e)
