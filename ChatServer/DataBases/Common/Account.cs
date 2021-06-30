@@ -67,7 +67,7 @@ namespace ChatServer.DataBases.Common
                 return default(Account);
             using (var c = new CommonContext())
             {
-                var acc = await c.Accounts.Where(x => x.NickName == _nickName).SingleOrDefaultAsync();
+                var acc = await c.Accounts.Where(x => x.NickName == _nickName).AsNoTracking().SingleOrDefaultAsync();
                 if (acc != default(Account))
                 {
                     if (acc.Pw == CryptHelper.PlainStrToBase64WithSha256(_plainPW))
