@@ -226,7 +226,7 @@ namespace ChatCore.Packets
 
 
         public SignIn_Req()
-            : base(PACKET_TYPE.REQ, ECONTENT.SIGN_UP)
+            : base(PACKET_TYPE.REQ, ECONTENT.SIGN_IN)
         {
         }
         public SignIn_Req(ChatPacket _cp)
