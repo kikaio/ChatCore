@@ -188,6 +188,8 @@ namespace ChatServer.Sessions
                                 arg.AuthenticatedDt = DateTime.UtcNow;
                                 Session.OnAuthenticated(Server.Inst, arg);
                             }
+                            else
+                                Session.SetState(ESessionState.ABOUT_SIGN);
                             await Session.OnSendTAP(ans);
                         });
                     }
@@ -210,13 +212,13 @@ namespace ChatServer.Sessions
             {
                 case ChatCore.Enums.ECONTENT.SIGN_OUT:
                     {
-                        Session.SetState(ESessionState.ABOUT_SIGN);
                         Task.Run(async () => {
                             //session logout logic
                             var ret = new Result_Ans();
                             ret.IsSuccessed = true;
                             await Session.OnSendTAP(ret);
                             logger.WriteDebug($"{Session.SessionId} is sign out, byebye");
+                            Session.SetState(ESessionState.ABOUT_SIGN);
                         });
                     }
                     break;

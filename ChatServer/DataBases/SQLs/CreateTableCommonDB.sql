@@ -11,4 +11,5 @@ CREATE TABLE `Account` (
     `IsSignOut` BIT NOT NULL DEFAULT(0)
 );
 
+ALTER TABLE `Account` ADD INDEX `idx_NickName` (NickName);
 

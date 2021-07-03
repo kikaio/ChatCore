@@ -18,7 +18,7 @@ namespace ChatServer.DataBases.Common
     [Table("Account")]
     public class Account
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public long Id { get; set; }
         [Required, Index(IsUnique = true)]
         public string NickName { get; set; }
@@ -67,13 +67,9 @@ namespace ChatServer.DataBases.Common
                 return default(Account);
             using (var c = new CommonContext())
             {
-                var acc = await c.Accounts.Where(x => x.NickName == _nickName).AsNoTracking().SingleOrDefaultAsync();
-                if (acc != default(Account))
-                {
-                    if (acc.Pw == CryptHelper.PlainStrToBase64WithSha256(_plainPW))
-                        return acc;
-                }
-                return default(Account);
+                var sha256dPw = CryptHelper.PlainStrToBase64WithSha256(_plainPW);
+                var acc = await c.Accounts.AsNoTracking().Where(x => x.NickName == _nickName && x.Pw == sha256dPw).SingleOrDefaultAsync();
+                return acc;
             }
         }
         public static async Task<bool> SignOut(string _nickName, string _plainPW)

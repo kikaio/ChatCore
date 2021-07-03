@@ -181,6 +181,7 @@ namespace ChatClient.Sessions
         {
         }
     }
+
     public class State_Sign_Up : SessionState
     {
         public State_Sign_Up(UserSession _s) : base(_s)
@@ -207,6 +208,7 @@ namespace ChatClient.Sessions
             }
         }
     }
+
     public class State_Sign_In : SessionState
     {
         public State_Sign_In(UserSession _s) : base(_s)
@@ -222,10 +224,15 @@ namespace ChatClient.Sessions
                         var ans = new Result_Ans(_cp);
                         ans.SerRead();
                         if (ans.IsSuccessed)
+                        {
                             logger.WriteDebug("Sign in completed");
+                            Session.UpdateState(ESessionState.CHATABLE);
+                        }
                         else
+                        {
                             logger.WriteDebug("Sign In failed, Check NickName or pw");
-                        Session.UpdateState(ESessionState.CHATABLE);
+                            Session.UpdateState(ESessionState.ABOUT_SIGN);
+                        }
                     }
                     break;
                 default:
@@ -249,10 +256,12 @@ namespace ChatClient.Sessions
                         var ans = new Result_Ans(_cp);
                         ans.SerRead();
                         if (ans.IsSuccessed)
+                        {
                             logger.WriteDebug("Sign out completed");
+                            Session.UpdateState(ESessionState.ABOUT_SIGN);
+                        }
                         else
-                            logger.WriteDebug("Sign out failed, Check NickName or pw");
-                        Session.UpdateState(ESessionState.ABOUT_SIGN);
+                            logger.WriteDebug("Sign out failed");
                     }
                     break;
                 default:
