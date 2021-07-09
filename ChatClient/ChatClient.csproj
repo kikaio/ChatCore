@@ -97,10 +97,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="Cmds\Cmd.cs" />
+    <Compile Include="Cmds\CmdStates.cs" />
     <Compile Include="Configs\ClientConfig.cs" />
     <Compile Include="Configs\ConfigMgr.cs" />
+    <Compile Include="Configs\RedisConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Redis\RedisDB.cs" />
     <Compile Include="Sessions\UserSession.cs" />
     <Compile Include="Sessions\UserSession.State.cs" />
   </ItemGroup>
