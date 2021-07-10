@@ -68,6 +68,11 @@ namespace ChatServer.Redis
                 await Database.StringSetAsync(_key, _str);
         }
 
+        public async Task RegistInRank(string _rankKey, string _name, long _val)
+        {
+            await Database.SortedSetAddAsync(_rankKey, _name, _val, CommandFlags.FireAndForget);
+        }
+
         public async Task<string> GetStr(string _key)
         {
             var ret = await Database.StringGetAsync(_key);
@@ -116,5 +121,4 @@ namespace ChatServer.Redis
             await Database.StringIncrementAsync(_key);
         }
     }
-
 }

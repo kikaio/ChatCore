@@ -3,6 +3,7 @@ using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,8 +16,6 @@ namespace ChatServer.Redis
     {
         public string Instkey { get; protected set; } = "ChatServer:Inst";
         public string DataKey { get; protected set; } = "ChatServer:Data";
-        public string ChatKey { get; protected set; } = "ChatServers";
-
 
         private RedisDB redis;
         private CoreLogger logger = new ConsoleLogger();
@@ -64,9 +63,8 @@ namespace ChatServer.Redis
                     await DeleteServerFromRedis(_name);
                 }
             }
-            await SetServerInst(_name);
+            await AddServerInst(_name);
             await SetServerData(_name);
-            await AddToChatList(_name);
             return true;
         }
 
@@ -74,7 +72,6 @@ namespace ChatServer.Redis
         {
             await DeleteServerInst(_name);
             await DeleteServerData(_name);
-            await DeleteFromChatList(_name);
         }
 
         private async Task<string> GetServerinst(string _name)
@@ -83,27 +80,17 @@ namespace ChatServer.Redis
             return ret;
         }
 
-        private async Task AddToChatList(string _name)
-        {
-            var curListCnt = await redis.Database.ListRightPushAsync(ChatKey, _name, StackExchange.Redis.When.NotExists);
-            logger.WriteDebug($"ChatServer List registed count in reids ChatServers is {curListCnt}");
-        }
-
-        private async Task DeleteFromChatList(string _name)
-        {
-            var afterListCnt = await redis.Database.ListRemoveAsync(ChatKey, _name);
-            logger.WriteDebug($"Delete {_name} from ChatServer List, remain cnt is {afterListCnt}");
-        }
-
-        private async Task SetServerInst(string _name)
+        
+        private async Task AddServerInst(string _name)
         {
             //vlaue is sessionCnt
-            await redis.SetStr($"{Instkey}:{_name}", 0.ToString());
+            await redis.RegistInRank(Instkey, _name, 0);
         }
 
         private async Task DeleteServerInst(string _name)
         {
-            await redis.Database.KeyDeleteAsync($"{Instkey}:{_name}");
+            //해당 서버를 목록에서 지워준다.
+            await redis.Database.SortedSetRemoveAsync(Instkey, _name);
         }
 
 
@@ -136,12 +123,14 @@ namespace ChatServer.Redis
 
         public async Task IncreaseSessionCnt(string _name)
         {
-            await redis.Database.StringIncrementAsync($"{Instkey}:{_name}");
+            //await redis.Database.StringIncrementAsync($"{Instkey}:{_name}");
+            await redis.Database.SortedSetIncrementAsync(Instkey, _name, 1, CommandFlags.FireAndForget);
         }
 
         public async Task DecreamentSessionCnt(string _name)
         {
-            await redis.Database.StringDecrementAsync($"{Instkey}:{_name}");
+            //await redis.Database.StringDecrementAsync($"{Instkey}:{_name}");
+            await redis.Database.SortedSetDecrementAsync(Instkey, _name, 1, CommandFlags.FireAndForget);
         }
     }
 }

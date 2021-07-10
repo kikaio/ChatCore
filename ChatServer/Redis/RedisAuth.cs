@@ -81,7 +81,6 @@ namespace ChatServer.Redis
 
         public async Task<bool> RemoveTokenInfo(string _token)
         {
-            
             await redis.Database.KeyDeleteAsync($"{TokenKey}:{_token}");
             // remove this sessison where connected server name
             await redis.Database.KeyDeleteAsync($"{ChatServerKey}:{_token}");
