@@ -61,7 +61,7 @@ namespace ChatClient
             wDict["cmd"] = new Worker();
             wDict["cmd"].PushJob(new JobOnce(DateTime.MinValue, async () =>
             {
-                var cmdObj = new Cmds.Cmd();
+                var cmdObj = new Cmds.Cmd(mSession);
                 cmdObj.SetState(Cmds.E_CMDSTATE.BEFORE_CONNECT);
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {

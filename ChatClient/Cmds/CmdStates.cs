@@ -25,11 +25,31 @@ namespace ChatClient.Cmds
         protected Cmd Cmd;
         protected CoreLogger logger = new ConsoleLogger();
         protected UserSession session;
+
+        protected Dictionary<string, Action<string>> commandMap = new Dictionary<string, Action<string>>();
         public CmdStates(UserSession _s)
         {
             session = _s;
+            InitCommand();
         }
-        public virtual void DoCmd(string _cmds) { }
+
+        protected virtual void InitCommand()
+        {
+
+        }
+
+        public void DoCmd(string _cmds)
+        {
+            if (string.IsNullOrEmpty(_cmds))
+                return;
+            //command 대분류는 공백으로 구분.
+            int splitPivot = _cmds.IndexOf(" ");
+            var cmdType = _cmds.Substring(0, splitPivot + 1);
+            var semiStr = _cmds.Substring(splitPivot + 1);
+            if (commandMap.ContainsKey(cmdType) == false)
+                return;
+            commandMap[cmdType](semiStr);
+        }
     }
 
     public class Cmd_None : CmdStates
@@ -38,18 +58,30 @@ namespace ChatClient.Cmds
         {
         }
 
-        public override void DoCmd(string _cmds)
-        {
-        }
     }
     public class Cmd_BeforeConnect : CmdStates
     {
+        private Dictionary<string, Action<string>> semiCmdMap = new Dictionary<string, Action<string>>();
+
+        private string cmd_GetLobbyList = "GET_LOBBY_LIST";
+        private string cmd_TryConn = "CONN";
         public Cmd_BeforeConnect(UserSession _s) : base(_s)
         {
         }
 
-        public override void DoCmd(string _cmds)
+        protected override void InitCommand()
         {
+            semiCmdMap[cmd_GetLobbyList] = GetLobbyList;
+            semiCmdMap[cmd_TryConn] = TryConn;
+        }
+
+        private void GetLobbyList(string _semi)
+        {
+            
+        }
+        private void TryConn(string _semi)
+        {
+
         }
     }
     public class Cmd_AboutSign : CmdStates
@@ -58,9 +90,6 @@ namespace ChatClient.Cmds
         {
         }
 
-        public override void DoCmd(string _cmds)
-        {
-        }
     }
     public class Cmd_Chat : CmdStates
     {
@@ -68,9 +97,6 @@ namespace ChatClient.Cmds
         {
         }
 
-        public override void DoCmd(string _cmds)
-        {
-        }
     }
     public class Cmd_Disconnected : CmdStates
     {
@@ -78,9 +104,6 @@ namespace ChatClient.Cmds
         {
         }
 
-        public override void DoCmd(string _cmds)
-        {
-        }
     }
     public class Cmd_TryRecnnect : CmdStates
     {
@@ -88,8 +111,5 @@ namespace ChatClient.Cmds
         {
         }
 
-        public override void DoCmd(string _cmds)
-        {
-        }
     }
 }
