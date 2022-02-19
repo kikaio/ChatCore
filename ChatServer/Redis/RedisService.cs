@@ -17,7 +17,8 @@ namespace ChatServer.Redis
             Auth.Init();
 
             ChatServer = new RedisChatServer("CHATSERVER");
-            ChatServer.Init(_instName, isRedisOverwrite);
+            ChatServer.Init();
+            ChatServer.RegisChatToRedis(_instName, isRedisOverwrite);
         }
     }
 }

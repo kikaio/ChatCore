@@ -27,7 +27,7 @@ namespace ChatServer.Redis
             DbName = _DBName;
         }
 
-        public void Init(string _instName, bool isOverwrite = false)
+        public void Init()
         {
             if (ConfigMgr.RedisServiceDict.ContainsKey(DbName) == false)
             {
@@ -40,10 +40,12 @@ namespace ChatServer.Redis
                 logger.Error($"Redis connect failed, Check Redis device, is process on???");
             else
                 logger.WriteDebug($"Redis connect successed : {DbName}");
-
-            Task.Run(async()=> await RegistServerInstToRedis(_instName, isOverwrite));
         }
 
+        public void RegisChatToRedis(string _instName, bool _isOverwrite = false)
+        {
+            Task.Run(async()=> await RegistServerInstToRedis(_instName, _isOverwrite));
+        }
 
         /// <summary>
         /// Server Instance data regist to redis db
@@ -79,7 +81,6 @@ namespace ChatServer.Redis
             var ret = await redis.GetStr($"{Instkey}:{_name}");
             return ret;
         }
-
         
         private async Task AddServerInst(string _name)
         {

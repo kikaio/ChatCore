@@ -1,4 +1,6 @@
-﻿using ChatClient.Sessions;
+﻿using ChatClient.Configs;
+using ChatClient.Redis;
+using ChatClient.Sessions;
 using CoreNet.Utils;
 using CoreNet.Utils.Loggers;
 using System;
@@ -24,12 +26,10 @@ namespace ChatClient.Cmds
     {
         protected Cmd Cmd;
         protected CoreLogger logger = new ConsoleLogger();
-        protected UserSession session;
-
         protected Dictionary<string, Action<string>> commandMap = new Dictionary<string, Action<string>>();
-        public CmdStates(UserSession _s)
+        protected UserSession session { get { return Client.mSession; } }
+        public CmdStates()
         {
-            session = _s;
             InitCommand();
         }
 
@@ -50,64 +50,90 @@ namespace ChatClient.Cmds
                 return;
             commandMap[cmdType](semiStr);
         }
+
+        public void RegistCmd(string _command, Action<string> _act)
+        {
+            commandMap[_command] = _act;
+        }
     }
 
     public class Cmd_None : CmdStates
     {
-        public Cmd_None(UserSession _s) : base(_s)
+        public Cmd_None() : base()
         {
         }
 
     }
     public class Cmd_BeforeConnect : CmdStates
     {
-        private Dictionary<string, Action<string>> semiCmdMap = new Dictionary<string, Action<string>>();
-
-        private string cmd_GetLobbyList = "GET_LOBBY_LIST";
+        private string cmd_GetChatList = "GET_CHAT_LIST";
         private string cmd_TryConn = "CONN";
-        public Cmd_BeforeConnect(UserSession _s) : base(_s)
+
+        private RedisChatServer redisChatServer;
+
+        public Cmd_BeforeConnect() : base()
         {
         }
 
         protected override void InitCommand()
         {
-            semiCmdMap[cmd_GetLobbyList] = GetLobbyList;
-            semiCmdMap[cmd_TryConn] = TryConn;
+            commandMap[cmd_GetChatList] = GetChatList;
+            commandMap[cmd_TryConn] = TryConn;
         }
 
-        private void GetLobbyList(string _semi)
+        private void GetChatList(string _semi)
         {
-            
+            Task.Run(async () => {
+                var list = await RedisService.ChatServer.GetLobbyServerList();
+                foreach (var ele in list)
+                {
+                    logger.WriteDebug($"{ele.Item1}'s session cnt {ele.Item2}");
+                }
+            });
         }
         private void TryConn(string _semi)
         {
-
+            string[] addr = _semi.Split(':');
+            var host = "";
+            var port = 0;
+            if (addr.Length != 2)
+            {
+                host = ConfigMgr.ClientConfig.Server;
+                port = ConfigMgr.ClientConfig.Port;
+            }
+            else
+            {
+                host = addr[0];
+                port = int.Parse(addr[1]);
+            }
+            Task.Run(async () => {
+            });
         }
     }
     public class Cmd_AboutSign : CmdStates
     {
-        public Cmd_AboutSign(UserSession _s) : base(_s)
+        public Cmd_AboutSign() : base()
         {
         }
 
     }
     public class Cmd_Chat : CmdStates
     {
-        public Cmd_Chat(UserSession _s) : base(_s)
+        public Cmd_Chat() : base()
         {
         }
 
     }
     public class Cmd_Disconnected : CmdStates
     {
-        public Cmd_Disconnected(UserSession _s) : base(_s)
+        public Cmd_Disconnected() : base()
         {
         }
 
     }
     public class Cmd_TryRecnnect : CmdStates
     {
-        public Cmd_TryRecnnect(UserSession _s) : base(_s)
+        public Cmd_TryRecnnect() : base()
         {
         }
 

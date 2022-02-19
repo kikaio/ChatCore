@@ -12,7 +12,7 @@ namespace ChatClient.Configs
     public static class ConfigMgr
     {
         public static ClientConfig ClientConfig { get; private set; }
-        public static Dictionary<string, RedisConfig> redisDbDict = new Dictionary<string, RedisConfig>();
+        public static Dictionary<string, RedisConfig> RedisDbDict = new Dictionary<string, RedisConfig>();
         public static void Init()
         {
             var appSettings = ConfigurationManager.AppSettings;
@@ -21,7 +21,6 @@ namespace ChatClient.Configs
 
             ReadClientConf(clientConfPath);
             ReadRedisConf(redisConfPath);
-
         }
         private static void ReadClientConf(string _path)
         {
@@ -57,7 +56,7 @@ namespace ChatClient.Configs
                     var confJson = JObject.Parse(confStr);
                     foreach (var pair in confJson)
                     {
-                        redisDbDict[pair.Key] = new RedisConfig(pair.Value as JObject);
+                        RedisDbDict[pair.Key] = new RedisConfig(pair.Value as JObject);
                     }
                 }
             }

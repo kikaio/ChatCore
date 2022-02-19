@@ -1,4 +1,5 @@
 ﻿using ChatClient.Configs;
+using ChatClient.Redis;
 using ChatClient.Sessions;
 using ChatCore.Packets;
 using ChatCore.Protocols;
@@ -20,7 +21,7 @@ namespace ChatClient
     {
         public static Client Inst { get; } = new Client();
 
-        private UserSession mSession = default(UserSession);
+        public static UserSession mSession { get; private set; } = default(UserSession);
         private Dictionary<string, Worker> wDict = new Dictionary<string, Worker>();
 
         private bool isDisposed = false;
@@ -30,6 +31,9 @@ namespace ChatClient
         {
             ConfigMgr.Init();
             TranslateEx.Init();
+
+            RedisService.Init();
+
             wDict["hb"] = new Worker("hb");
             long hbDelta = TimeSpan.FromMilliseconds(CoreSession.hbDelayMilliSec * 0.75f).Ticks;
             wDict["hb"].PushJob(new JobNormal(DateTime.MinValue, DateTime.MaxValue, hbDelta, () => {
@@ -63,9 +67,11 @@ namespace ChatClient
             {
                 var cmdObj = new Cmds.Cmd(mSession);
                 cmdObj.SetState(Cmds.E_CMDSTATE.BEFORE_CONNECT);
+
                 while (isDown == false && mSession.Sock.Sock.Connected)
                 {
                     cmdObj.WaitCmdInputs();
+
                     switch (mSession.curState)
                     {
                         case ESessionState.ABOUT_SIGN:
@@ -148,10 +154,10 @@ namespace ChatClient
 
         public override void Start()
         {
-            CoreTCP tcp = new CoreTCP();
             var serverIP = ConfigMgr.ClientConfig.Server;
             var port = ConfigMgr.ClientConfig.Port;
 
+            CoreTCP tcp = new CoreTCP();
             ep = new IPEndPoint(IPAddress.Parse(serverIP), port);
             tcp.Sock.Connect(ep);
             mSession = new UserSession(-1, tcp);

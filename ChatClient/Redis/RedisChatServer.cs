@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ChatClient.Configs;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Redis;
 using System;
@@ -10,20 +11,28 @@ using System.Threading.Tasks;
 namespace ChatClient.Redis
 {
     //todo : Server 프로젝트에 있는 RedisChatServer와 동일하니 합친 후 Common으로 옮길것.
-    public class RedisChatServer : RedisDB
+    public class RedisChatServer
     {
         public string Instkey { get; protected set; } = "ChatServer:Inst";
         public string DataKey { get; protected set; } = "ChatServer:Data";
 
-        public RedisChatServer(string _dbName, string _ip, int _port) 
-            : base(_dbName, _ip, _port)
+        private RedisDB redis;
+
+        public RedisChatServer(string _dbName) 
         {
+            Init(_dbName);
+        }
+
+        private void Init(string _dbName)
+        {
+            var conf = ConfigMgr.RedisDbDict[_dbName];
+            redis = RedisDB.Create(_dbName, conf);
         }
 
         public async Task<List<Tuple<string, long>>> GetLobbyServerList()
         {
             var ret = new List<Tuple<string, long>>();
-            var list = await Database.SortedSetRangeByScoreWithScoresAsync(Instkey);
+            var list = await redis.Database.SortedSetRangeByScoreWithScoresAsync(Instkey);
             foreach(var ele in list)
             {
                 var s = new Tuple<string, long>(ele.Element, (long)ele.Score);
@@ -35,7 +44,7 @@ namespace ChatClient.Redis
         public async Task<Tuple<string, long>> GetFirstServer()
         {
             //session cnt 별 ranking?
-            var min = await Database.SortedSetRangeByScoreWithScoresAsync(Instkey, 0);
+            var min = await redis.Database.SortedSetRangeByScoreWithScoresAsync(Instkey, 0);
             if(min == null)
                 return null;
             return new Tuple<string, long>(min.First().Element, (long)min.First().Score);
@@ -43,7 +52,7 @@ namespace ChatClient.Redis
 
         private async Task<Tuple<string, long>> GetServerData(string _name)
         {
-            var str = await Database.StringGetAsync($"{DataKey}:{_name}");
+            var str = await redis.Database.StringGetAsync($"{DataKey}:{_name}");
             if (str == "")
                 return new Tuple<string, long>("", 0);
             else
